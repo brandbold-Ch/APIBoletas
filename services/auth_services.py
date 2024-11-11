@@ -1,16 +1,23 @@
 from decorators.handlers import exception_handler
 from errors.errors import PasswordsDoNotMatch
 from models.student_model import ALUMNO
-from util.cache import cache, cached
+from utils.cache import cache, cached
+from utils.token import create_token
 
 
 class AuthServices:
 
     @exception_handler
-    @cached(cache, key=lambda self, username, password: username)
-    def login(self, username: str, password: str) -> ALUMNO:
+    #@cached(cache, key=lambda self, username, password: username)
+    def login(self, username: str, password: str) -> dict:
         student = ALUMNO().get(MATRICULA=username)
 
         if student.CURP != password:
             raise PasswordsDoNotMatch()
-        return student
+
+        return {
+            "token": create_token({
+                "enrollment": username
+            }),
+            "student_data": student.to_repr()
+        }

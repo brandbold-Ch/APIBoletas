@@ -1,4 +1,4 @@
-from util.cache import cache
+from utils.cache import cache
 from typing import Callable
 
 

@@ -1,9 +1,9 @@
 from routes.student_routes import student_routes
 from routes.auth_routes import auth_routes
 from routes.load_routes import load_routes
-from errors.errors import ServerBaseException, DatabaseError
+from errors.errors import ServerBaseException, DatabaseError, TokenNotAllowed
 from fastapi.responses import JSONResponse
-from fastapi import FastAPI, Request, File, UploadFile
+from fastapi import FastAPI, Request, File, UploadFile, Query
 from typing import Annotated
 
 
@@ -12,6 +12,7 @@ app = FastAPI(
     description="API Rest para obtención de boletas académicas. 📃",
     version="1.0.0"
 )
+token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY2hvb2wiOiJDT0JBQ0ggUGxhbnRlbCAyMTciLCJ0eXBlIjoiUHJlcGFyYXRvcmlhIn0.wINe8sP5B4bhbXC9ciAPXewvyK4b4bESgnXafJIWVGQ"
 
 
 @app.exception_handler(ServerBaseException)
@@ -23,7 +24,13 @@ async def server_base_exception_handler(request: Request, exc: ServerBaseExcepti
 
 
 @app.post("/load-database")
-async def load_dbf(dbf_data: Annotated[UploadFile, File(...)]) -> JSONResponse:
+async def load_dbf(
+        dbf_data: Annotated[UploadFile, File(...)],
+        access: Annotated[str, Query(...)]
+) -> JSONResponse:
+    if access != token:
+        raise TokenNotAllowed()
+
     data = await dbf_data.read()
 
     try:

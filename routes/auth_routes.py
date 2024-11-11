@@ -14,6 +14,6 @@ async def login(
 ) -> JSONResponse:
     return JSONResponse(
         status_code=200,
-        content=auth.login(username, password).to_repr()
+        content=auth.login(username, password)
     )
 
