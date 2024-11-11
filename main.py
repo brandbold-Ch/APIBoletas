@@ -1,11 +1,10 @@
-from sys import prefix
-
-from routes.score_routes import report_routes
 from routes.student_routes import student_routes
 from routes.auth_routes import auth_routes
-from errors.errors import ServerBaseException
+from routes.load_routes import load_routes
+from errors.errors import ServerBaseException, DatabaseError
 from fastapi.responses import JSONResponse
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, File, UploadFile
+from typing import Annotated
 
 
 app = FastAPI(
@@ -22,6 +21,23 @@ async def server_base_exception_handler(request: Request, exc: ServerBaseExcepti
         content=exc.to_dict()
     )
 
-student_routes.include_router(report_routes, prefix="/{enrollment}/score")
+
+@app.post("/load-database")
+async def load_dbf(dbf_data: Annotated[UploadFile, File(...)]) -> JSONResponse:
+    data = await dbf_data.read()
+
+    try:
+        with open(f"db/{dbf_data.filename}", "wb") as dbf:
+            dbf.write(data)
+
+        return JSONResponse(
+            status_code=202,
+            content={"status": f"Loaded database {dbf_data.filename} ✅"}
+        )
+
+    except Exception as e:
+        raise DatabaseError() from e
+
+student_routes.include_router(load_routes, prefix="/{enrollment}/loads")
 app.include_router(student_routes, prefix="/students", tags=["Student"])
 app.include_router(auth_routes, prefix="/auth", tags=["Auth"])

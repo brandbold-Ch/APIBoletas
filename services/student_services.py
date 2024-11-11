@@ -5,10 +5,7 @@ from models.student_model import ALUMNO
 
 class StudentServices:
 
-    def __init__(self) -> None:
-        pass
-
     @exception_handler
     @caching
-    def get_student(self, enrollment: str, **kwargs) -> ALUMNO:
-        return kwargs.get("data", ALUMNO().get(MATRICULA=enrollment))
+    def get_student(self, enrollment: str) -> ALUMNO:
+        return ALUMNO().get(MATRICULA=enrollment)

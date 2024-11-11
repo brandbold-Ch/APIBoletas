@@ -9,8 +9,8 @@ class ALUMNO(Model):
         super().__init__(self)
         self.MATRICULA = None
         self.NOMBRES = None
+        self.STATUSA = None
         self.APELLIDOS = None
         self.GRADO = None
         self.GRUPO = None
-        self.STADESCRI = None
         self.CURP = None

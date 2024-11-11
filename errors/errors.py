@@ -20,9 +20,9 @@ class ServerBaseException(Exception):
 
 
 class NotFoundEntity(ServerBaseException):
-    def __init__(self, message="Student not found 🤷") -> None:
+    def __init__(self, message="Entity not found 🤷") -> None:
         super().__init__(message)
-        self.add_note("El alumno no existe. 🧑‍🎓")
+        self.add_note("La entidad no existe. 🧑‍🎓")
 
         self.error_code = 1201
         self.status_code = 404
@@ -45,5 +45,25 @@ class PasswordsDoNotMatch(ServerBaseException):
         self.add_note("La contraeña es incorrecta. ⛔")
 
         self.error_code = 1203
-        self.status_code = 404
+        self.status_code = 401
         self.http_argument = "Unauthorized 🚫"
+
+
+class DatabaseError(ServerBaseException):
+    def __init__(self, message="Error reading or writing to database 💿"):
+        super().__init__(message)
+        self.add_note("Error al leer o escribir en la base de datos")
+
+        self.error_code = 1204
+        self.status_code = 500
+        self.http_argument = "Internal Server Error ❌"
+
+
+class InvalidParam(ServerBaseException):
+    def __init__(self, message="The parameter type must be student or score ⚠️"):
+        super().__init__(message)
+        self.add_note("El tipo de parametro debe ser 'student' o 'score'")
+
+        self.error_code = 1205
+        self.status_code = 400
+        self.http_argument = "Bad Request 🚫"

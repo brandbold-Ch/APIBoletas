@@ -6,9 +6,6 @@ from util.cache import cache, cached
 
 class AuthServices:
 
-    def __init__(self) -> None:
-        pass
-
     @exception_handler
     @cached(cache, key=lambda self, username, password: username)
     def login(self, username: str, password: str) -> ALUMNO:
