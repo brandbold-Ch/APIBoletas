@@ -8,3 +8,5 @@ class ASIGNATURA(Model):
     def __init__(self):
         super().__init__(self)
         self.ASIGNATURA = None
+        self.CLAVE = None
+        self.CLAVE_IN = None

@@ -3,6 +3,7 @@ from models.topic_model import ASIGNATURA
 from models.student_model import ALUMNO
 from errors.errors import InvalidTimePeriod
 from decorators.handlers import exception_handler
+from services.history_services import HistoryServices
 
 
 class Ratings:
@@ -45,7 +46,7 @@ class Ratings:
 
             return {
                 "TOTAL_FALTAS": faults,
-                "PROMEDIO_FINAL": rating / len(self.reports)
+                "PROMEDIO_FINAL": float(f"{rating / len(self.reports):.2f}")
             }
         except ZeroDivisionError:
             pass
@@ -64,8 +65,11 @@ class LoadServices:
     @exception_handler
     def get_loads(self, enrollment: str, partial: int) -> list[dict]:
         student = ALUMNO().get(MATRICULA=enrollment, relates=True)
+        history_services = HistoryServices()
         rating = Ratings(student.CARGA, partial)
         merged_objs = rating + student
+
+        history_services.set_history(student)
 
         for load in student.CARGA:
             load["DATOS_MATERIA"] = ASIGNATURA().get_all(
