@@ -11,7 +11,6 @@ class HistoryServices:
 
     def set_history(self, student: ALUMNO):
         histories = HISTORIAL().get_all(MATRICULA=student.MATRICULA)
-        print(histories)
 
     def delete_history(self):
         ...

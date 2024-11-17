@@ -3,7 +3,6 @@ from models.topic_model import ASIGNATURA
 from models.student_model import ALUMNO
 from errors.errors import InvalidTimePeriod
 from decorators.handlers import exception_handler
-from services.history_services import HistoryServices
 
 
 class Ratings:
@@ -11,34 +10,69 @@ class Ratings:
     def __init__(self, reports: list[dict], partial: int) -> None:
         self.reports = reports
         self.partial = partial
+        self.ratings = {
+            '0.0': ("CERO", "REPROBADO"),
+            '1.0': ("UNO", "REPROBADO"),
+            '2.0': ("DOS", "REPROBADO"),
+            '3.0': ("TRES", "REPROBADO"),
+            '4.0': ("CUATRO", "REPROBADO"),
+            '5.0': ("CINCO", "REPROBADO"),
+            '6.0': ("SEIS", "APROBADO"),
+            '7.0': ("SIETE", "APROBADO"),
+            '8.0': ("OCHO", "APROBADO"),
+            '9.0': ("NUEVE", "APROBADO"),
+            '10.0': ("DIEZ", "APROBADO"),
+        }
 
-    def calculate_partials(self) -> dict:
+    def _validate_partials(self, partials: list[str]) -> bool:
+        partials = [False if x == 'None' else True for x in partials]
+
+        if all(partials):
+            return True
+
+        else:
+            return False
+
+    def _calculate_semiannual(self) -> dict:
         try:
-            rating, faults = 0.0, 0
-            partial = f"PARCIAL_{self.partial}"
-            score_to_word = {
-                '0.0': ("CERO", "REPROBADO"),
-                '1.0': ("UNO", "REPROBADO"),
-                '2.0': ("DOS", "REPROBADO"),
-                '3.0': ("TRES", "REPROBADO"),
-                '4.0': ("CUATRO", "REPROBADO"),
-                '5.0': ("CINCO", "REPROBADO"),
-                '6.0': ("SEIS", "APROBADO"),
-                '7.0': ("SIETE", "APROBADO"),
-                '8.0': ("OCHO", "APROBADO"),
-                '9.0': ("NUEVE", "APROBADO"),
-                '10.0': ("DIEZ", "APROBADO"),
-            }
-
-            if self.partial == 0:
-                return {}
+            rating, average_by_subject = 0.0, 0
 
             for item in self.reports:
-                if item[partial] != 'None':
-                    if item[partial] in score_to_word:
-                        item["PALABRA"], item["OBSERVA"] = score_to_word[item[partial]]
+                check = self._validate_partials(
+                    [
+                        item["PARCIAL_1"],
+                        item["PARCIAL_2"],
+                        item["PARCIAL_3"]
+                    ]
+                )
 
-                    rating += float(item[partial])
+                if check:
+                    average_by_subject += (float(item["PARCIAL_1"]) +
+                                           float(item["PARCIAL_2"]) +
+                                           float(item["PARCIAL_3"]))
+                    item["PROMEDIO"] = round(float(f"{average_by_subject / 3:.2f}"))
+                    item["PALABRA"], item["OBSERVA"] = self.ratings[f"{item['PROMEDIO']}.0"]
+                    rating += item["PROMEDIO"]
+                    average_by_subject = 0
+
+                else:
+                    raise InvalidTimePeriod("You have not completed the three partials 🕓️")
+
+            return {
+                "PROMEDIO_FINAL": float(f"{rating / len(self.reports):.2f}")
+            }
+        except ZeroDivisionError:
+            pass
+
+    def _calculate_partials(self) -> dict:
+        try:
+            rating, faults = 0.0, 0
+            chunk = f"PARCIAL_{self.partial}"
+
+            for item in self.reports:
+                if item[chunk] != 'None':
+                    item["PALABRA"], item["OBSERVA"] = self.ratings[item[chunk]]
+                    rating += float(item[chunk])
                     faults += int(item[f"FALTAS_{self.partial}"])
 
                 else:
@@ -52,28 +86,40 @@ class Ratings:
             pass
 
     def __add__(self, other):
-        details = self.calculate_partials()
+        details = None
 
-        if details == {}:
+        if self.partial == 0:
             return None
+
+        elif 1 <= self.partial <= 3:
+            details = self._calculate_partials()
+
+        elif self.partial == 6:
+            details = self._calculate_semiannual()
+
         setattr(other, "DETALLES", details)
         return other
 
 
 class LoadServices:
 
-    @exception_handler
-    def get_loads(self, enrollment: str, partial: int) -> list[dict]:
-        student = ALUMNO().get(MATRICULA=enrollment, relates=True)
-        history_services = HistoryServices()
-        rating = Ratings(student.CARGA, partial)
-        merged_objs = rating + student
-
-        history_services.set_history(student)
-
-        for load in student.CARGA:
+    def _merge_topics(self, obj: ALUMNO) -> None:
+        for load in obj.CARGA:
             load["DATOS_MATERIA"] = ASIGNATURA().get_all(
                 CLAVE_IN=load["CLAVE_IN"], easy_view=True
             )[-1]
+
+    @exception_handler
+    def get_academic_loads(self, enrollment: str, partial: int = 0) -> ALUMNO:
+        student = ALUMNO().get(MATRICULA=enrollment, relates=True)
+        merged_objs = Ratings(student.CARGA, partial) + student
+        self._merge_topics(student)
+
+        return student if merged_objs is None else merged_objs
+
+    def get_semiannual_academic_loads(self, enrollment: str) -> ALUMNO:
+        student = ALUMNO().get(MATRICULA=enrollment, relates=True)
+        merged_objs = Ratings(student.CARGA, 6) + student
+        self._merge_topics(student)
 
         return student if merged_objs is None else merged_objs
