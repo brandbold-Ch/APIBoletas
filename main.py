@@ -5,6 +5,7 @@ from routes.history_routes import history_routes
 from errors.errors import ServerBaseException, DatabaseError, TokenNotAllowed
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Request, File, UploadFile, Query
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
 
 
@@ -12,6 +13,13 @@ app = FastAPI(
     title="COBACH Plantel 2️⃣1️⃣7️⃣ Soconusco. 🏫",
     description="API Rest para obtención de boletas académicas. 📃",
     version="1.0.0"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY2hvb2wiOiJDT0JBQ0ggUGxhbnRlbCAyMTciLCJ0eXBlIjoiUHJlcGFyYXRvcmlhIn0.wINe8sP5B4bhbXC9ciAPXewvyK4b4bESgnXafJIWVGQ"
 
