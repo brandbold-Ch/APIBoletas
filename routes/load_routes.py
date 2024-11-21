@@ -36,7 +36,7 @@ async def get_semiannual_academic_loads(
         background: BackgroundTasks,
         enrollment: Annotated[str, Path(max_length=15, min_length=15)],
 ) -> JSONResponse:
-    response = load.get_semiannual_academic_loads(enrollment).to_repr()
+    response = load.get_academic_loads(enrollment, 6).to_repr()
     background.add_task(check_student, response)
 
     return JSONResponse(

@@ -13,6 +13,7 @@ def check_student(student: dict) -> None:
             new_history.MATRICULA = student["MATRICULA"]
             new_history.GRUPO = student["GRUPO"]
             new_history.GRADO = student["GRADO"]
+            new_history.CLAVEMAT = item["CLAVEMAT"]
             new_history.ASIGNATURA = item["DATOS_MATERIA"]["ASIGNATURA"]
             new_history.PARCIAL_1 = item["PARCIAL_1"]
             new_history.save()

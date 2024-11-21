@@ -10,14 +10,14 @@ class AuthServices:
     @exception_handler
     #@cached(cache, key=lambda self, username, password: username)
     def login(self, username: str, password: str) -> dict:
-        student = ALUMNO().get(MATRICULA=username)
+        student = ALUMNO().get(CURP=username)
 
-        if student.CURP != password:
+        if student.MATRICULA != password:
             raise PasswordsDoNotMatch()
 
         return {
             "token": create_token({
-                "enrollment": username
+                "enrollment": password
             }),
             "student_data": student.to_repr()
         }

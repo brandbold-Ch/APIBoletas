@@ -62,6 +62,6 @@ async def welcome_message() -> JSONResponse:
     )
 
 student_routes.include_router(load_routes, prefix="/{enrollment}/loads")
-student_routes.include_router(history_routes, prefix="/{enrollment}/history")
+student_routes.include_router(history_routes, prefix="/{enrollment}/histories")
 app.include_router(student_routes, prefix="/students", tags=["Student"])
 app.include_router(auth_routes, prefix="/auth", tags=["Auth"])
