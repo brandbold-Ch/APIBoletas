@@ -1,6 +1,6 @@
+from decorators.handlers import exception_handler
 from models.history_model import HISTORIAL
 from models.student_model import ALUMNO
-from decorators.handlers import exception_handler
 from utils.tools import Ratings
 
 
@@ -14,12 +14,12 @@ class HistoryServices:
 
         return student
 
-    def set_history(self, student: ALUMNO):
+    def set_history(self, student: ALUMNO) -> None:
         histories = HISTORIAL().get_all(MATRICULA=student.MATRICULA)
 
-    def delete_history(self):
+    def delete_history(self) -> None:
         ...
 
-    def update_history(self):
+    def update_history(self) -> None:
         ...
     

@@ -1,3 +1,5 @@
 /db/Alumnos.dbf
 /db/ASIGNATURAS.DBF
 /db/cargas.dbf
+/db/HISTORIALES.dbf
+__pycache__/

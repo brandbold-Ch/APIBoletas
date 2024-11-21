@@ -1,7 +1,6 @@
 from decorators.handlers import exception_handler
 from errors.errors import PasswordsDoNotMatch
 from models.student_model import ALUMNO
-from utils.cache import cache, cached
 from utils.token import create_token
 
 
