@@ -66,7 +66,7 @@ class Ratings:
             chunk = f"PARCIAL_{self.partial}"
 
             for item in self.reports:
-                if item[chunk] != "None" and item[chunk] != "":
+                if item[chunk] != "None":
                     item["PALABRA"], item["OBSERVA"] = self.ratings[item[chunk]]
                     rating += float(item[chunk])
                     faults += int(item.get(f"FALTAS_{self.partial}", 0))

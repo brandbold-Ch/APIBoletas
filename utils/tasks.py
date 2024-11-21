@@ -6,6 +6,8 @@ histories = HistoryServices()
 
 def check_student(student: dict) -> None:
     data = HISTORIAL().get_all(MATRICULA=student["MATRICULA"], GRADO=student["GRADO"])
+    for d in data:
+        print(d.__dict__)
 
     if len(data) == 0:
         for item in student["CARGA"]:
@@ -16,4 +18,6 @@ def check_student(student: dict) -> None:
             new_history.CLAVEMAT = item["CLAVEMAT"]
             new_history.ASIGNATURA = item["DATOS_MATERIA"]["ASIGNATURA"]
             new_history.PARCIAL_1 = item["PARCIAL_1"]
+            new_history.PARCIAL_2 = item["PARCIAL_2"]
+            new_history.PARCIAL_3 = item["PARCIAL_3"]
             new_history.save()
