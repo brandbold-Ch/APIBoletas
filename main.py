@@ -25,7 +25,20 @@ token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY2hvb2wiOiJDT0JBQ0ggUGxhbnRlbC
 
 
 @app.exception_handler(ServerBaseException)
-async def server_base_exception_handler(request: Request, exc: ServerBaseException):
+async def server_base_exception_handler(request: Request, exc: ServerBaseException) -> JSONResponse:
+    """
+    Custom exception handler for `ServerBaseException`.
+
+    This function catches the `ServerBaseException` and returns a JSON response
+    with the exception's status code and message.
+
+    Args:
+        request (Request): The incoming HTTP request.
+        exc (ServerBaseException): The exception raised during request processing.
+
+    Returns:
+        JSONResponse: A response containing the error details.
+    """
     return JSONResponse(
         status_code=exc.status_code,
         content=exc.to_dict()
@@ -37,6 +50,20 @@ async def load_dbf(
         dbf_data: Annotated[UploadFile, File(...)],
         access: Annotated[str, Query(...)]
 ) -> JSONResponse:
+    """
+    Endpoint to load database from a DBF file.
+
+    This endpoint requires a valid access token. If the token is correct,
+    it saves the uploaded DBF file to the server's local storage. If any errors occur
+    during file handling, a `DatabaseError` is raised.
+
+    Args:
+        dbf_data (UploadFile): The DBF file to be uploaded.
+        access (str): Access token for authorization.
+
+    Returns:
+        JSONResponse: A response indicating the success or failure of the database load operation.
+    """
     if access != token:
         raise TokenNotAllowed()
     data = await dbf_data.read()
@@ -56,6 +83,14 @@ async def load_dbf(
 
 @app.get("/")
 async def welcome_message() -> JSONResponse:
+    """
+    Welcome message for the root endpoint.
+
+    This endpoint returns a message indicating the API's status and its purpose.
+
+    Returns:
+        JSONResponse: A response containing the API status and description.
+    """
     return JSONResponse(
         status_code=200,
         content={

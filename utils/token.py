@@ -6,8 +6,32 @@ from jose import jwt, JWTError
 
 
 class CustomHTTPBearer(HTTPBearer):
+    """
+    A custom HTTPBearer class to handle bearer token authorization in FastAPI.
+
+    This class overrides the `__call__` method to extract the authorization token
+    from incoming requests. It handles cases where the token is missing or invalid
+    by raising appropriate errors.
+
+    Methods:
+        __call__(self, request: Request) -> HTTPAuthorizationCredentials:
+            Extracts and validates the token from the incoming request.
+            If the token is missing, raises a `NotFoundTokenError`.
+    """
 
     async def __call__(self, request: Request) -> HTTPAuthorizationCredentials:
+        """
+        Extracts the Bearer token from the request headers and assigns it to the request's state.
+
+        Args:
+            request (Request): The incoming HTTP request object.
+
+        Raises:
+            NotFoundTokenError: If the authorization token is missing from the request.
+
+        Returns:
+            HTTPAuthorizationCredentials: The credentials object containing the token.
+        """
         self.auto_error = False
         credentials = await super().__call__(request)
 
@@ -19,6 +43,19 @@ class CustomHTTPBearer(HTTPBearer):
 
 
 def create_token(payload) -> str:
+    """
+    Creates a JWT token with the provided payload and an expiration date.
+
+    This function generates a token that includes the provided payload and an
+    expiration date set to 7 days from the current time. The token is encoded using
+    the HS256 algorithm and a predefined secret key.
+
+    Args:
+        payload (dict): The payload data to be encoded in the JWT token.
+
+    Returns:
+        str: The encoded JWT token as a string.
+    """
     expire = datetime.utcnow() + timedelta(days=7)
     payload.update({"exp": expire})
 
@@ -30,6 +67,22 @@ def create_token(payload) -> str:
 
 
 def verify_token(token: str) -> dict:
+    """
+    Verifies the authenticity of the provided JWT token and decodes it.
+
+    This function attempts to decode the provided JWT token using the HS256 algorithm.
+    If the token is expired or invalid, it raises the corresponding error (`ExpiredTokenError` or `InvalidTokenError`).
+
+    Args:
+        token (str): The JWT token to be verified and decoded.
+
+    Raises:
+        ExpiredTokenError: If the token has expired.
+        InvalidTokenError: If the token is invalid or the signature doesn't match.
+
+    Returns:
+        dict: The decoded payload of the JWT token if valid.
+    """
     try:
         decoded_token = jwt.decode(
             token, "fArS619|QKL$",
