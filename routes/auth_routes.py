@@ -1,7 +1,22 @@
-from services.auth_services import AuthServices
-from fastapi.responses import JSONResponse
-from fastapi import APIRouter, Body
+"""
+This file defines the authentication routes for the API using FastAPI.
+
+It includes the `/login` endpoint that handles user login requests. Users must provide a
+username (18 characters) and a password (15 characters) to authenticate. The authentication
+is managed by the `AuthServices` class, which verifies the credentials and returns a response
+containing either an access token or an error message.
+
+The `APIRouter` is used to register the login route, and the `JSONResponse` is used to send
+responses with the appropriate status code and data.
+
+Endpoints:
+    POST /login: Authenticates a user by verifying their username and password.
+"""
+
 from typing import Annotated
+from fastapi import APIRouter, Body
+from fastapi.responses import JSONResponse
+from services.auth_services import AuthServices
 
 auth_routes = APIRouter()
 auth = AuthServices()

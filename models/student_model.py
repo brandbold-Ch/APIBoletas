@@ -1,6 +1,23 @@
+"""
+student_model.py
 
-from dbfmapper.model import Model
+This module defines the `ALUMNO` model, representing student information within the academic
+system. It maps to a DBF file containing detailed student records, such as personal and academic
+information, including names, CURP, grade, group, and enrollment status.
+
+Key Features:
+- Links student records with personal details, academic grade, group, and enrollment status.
+- Maps student attributes to columns in the corresponding DBF file, facilitating easy data access.
+
+Usage:
+This model is used for managing and storing student data, mapped to a DBF file. It allows
+easy integration into the academic system for tracking students' personal and academic information,
+and can be linked to other models for more complex student-related processes,
+such as tracking grades or academic performance.
+"""
+
 from os import path
+from dbfmapper.model import Model
 
 
 class ALUMNO(Model):

@@ -1,10 +1,34 @@
-from services.student_services import StudentServices
-from decorators.authenticator import authenticate
+"""
+This file defines the route for retrieving student data from the API based on a student's enrollment ID.
+
+It includes a single endpoint:
+
+1. `/students/{enrollment}` - Retrieves the student data for the student associated with the provided enrollment ID.
+   The enrollment ID must be exactly 15 characters long. The request is authenticated using a Bearer token
+   and the `authenticate` decorator ensures the user is properly authenticated before accessing the data.
+
+The `StudentServices` class handles the logic for retrieving student data, and the `CustomHTTPBearer` class
+is used to ensure that a valid Bearer token is included in the request headers.
+
+Dependencies:
+    - Bearer Token Authentication: Required for this route.
+    - A valid enrollment ID that is exactly 15 characters long.
+
+Example Request:
+    - GET /students/{enrollment}
+
+Example Response:
+    - On success: Status code 200 with student data.
+    - On failure: Status code with error message.
+"""
+
+from typing import Annotated
 from fastapi import APIRouter, Path, Depends
 from fastapi.responses import JSONResponse
-from utils.token import CustomHTTPBearer
 from fastapi.requests import Request
-from typing import Annotated
+from services.student_services import StudentServices
+from decorators.authenticator import authenticate
+from utils.token import CustomHTTPBearer
 
 student_routes = APIRouter()
 student = StudentServices()

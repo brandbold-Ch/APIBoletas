@@ -1,12 +1,32 @@
+"""
+This FastAPI application provides RESTful endpoints for managing academic records
+at COBACH Plantel 217 Soconusco. It includes features such as loading a database
+from a DBF file and handling exceptions.
+
+Features:
+- Load database from a DBF file (POST `/load-database`).
+- Handle student records with routes for loading and viewing histories (via `/students`).
+- Provide authentication routes via `/auth`.
+
+The application includes proper error handling and middleware for cross-origin requests.
+
+Components:
+- **CORS Middleware**: Allows cross-origin requests from any origin.
+- **Custom Exception Handlers**: Handle `ServerBaseException`, `DatabaseError`, and `TokenNotAllowed`.
+- **Environment Variables**: Loaded using `dotenv` to manage secrets and tokens.
+"""
+
+from typing import Annotated
+from os import getenv
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request, File, UploadFile, Query
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from routes.student_routes import student_routes
 from routes.auth_routes import auth_routes
 from routes.load_routes import load_routes
 from routes.history_routes import history_routes
-from errors.errors import ServerBaseException, DatabaseError, TokenNotAllowed
-from fastapi.responses import JSONResponse
-from fastapi import FastAPI, Request, File, UploadFile, Query
-from fastapi.middleware.cors import CORSMiddleware
-from typing import Annotated
+from errors.errors import ServerBaseException, ServerError, TokenNotAllowed
 
 
 app = FastAPI(
@@ -21,7 +41,6 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
-token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY2hvb2wiOiJDT0JBQ0ggUGxhbnRlbCAyMTciLCJ0eXBlIjoiUHJlcGFyYXRvcmlhIn0.wINe8sP5B4bhbXC9ciAPXewvyK4b4bESgnXafJIWVGQ"
 
 
 @app.exception_handler(ServerBaseException)
@@ -64,21 +83,24 @@ async def load_dbf(
     Returns:
         JSONResponse: A response indicating the success or failure of the database load operation.
     """
-    if access != token:
-        raise TokenNotAllowed()
-    data = await dbf_data.read()
+    load_dotenv()
 
-    try:
-        with open(f"db/{dbf_data.filename}", "wb") as dbf:
-            dbf.write(data)
+    if access == getenv("ACCESS_TOKEN"):
+        read_data = await dbf_data.read()
 
-        return JSONResponse(
-            status_code=202,
-            content={"status": f"Loaded database {dbf_data.filename} ✅"}
-        )
+        try:
+            with open(f"db/{dbf_data.filename}", "wb") as dbf:
+                dbf.write(read_data)
 
-    except Exception as e:
-        raise DatabaseError() from e
+            return JSONResponse(
+                status_code=202,
+                content={"status": f"Loaded database {dbf_data.filename} ✅"}
+            )
+
+        except Exception as e:
+            raise ServerError() from e
+
+    raise TokenNotAllowed()
 
 
 @app.get("/")

@@ -1,7 +1,24 @@
+"""
+This module defines the `HISTORIAL` model, representing the historical academic records
+of students. The data is mapped to a DBF file that stores grades, subject details,
+and other academic information for each student.
+
+Key Features:
+- Links academic records to the `ALUMNO` model through the `MATRICULA` field.
+- Provides attributes for managing grades across multiple partial exams and calculating averages.
+- Includes fields for subject codes, grade levels, and additional performance observations.
+
+Usage:
+This model is designed for use with the `dbfmapper` library, allowing easy access to and
+manipulation of DBF-based historical records. It enables integration with other models
+and data sources to manage and analyze academic performance.
+"""
+
+
+from typing import Annotated
 from os import path
 from dbfmapper.model import Model
 from models.student_model import ALUMNO
-from typing import Annotated
 
 
 class HISTORIAL(Model):
@@ -29,9 +46,11 @@ class HISTORIAL(Model):
 
     def __init__(self) -> None:
         """
-        Initializes the HISTORIAL model and maps fields to the corresponding columns in the DBF file.
+        Initializes the HISTORIAL model and maps fields to the
+        corresponding columns in the DBF file.
 
-        Sets up the attributes based on the structure of the historical academic records, including
+        Sets up the attributes based on the structure of the
+        historical academic records, including
         fields for the student's enrollment number, grades, and subject information.
         """
         super().__init__(self)

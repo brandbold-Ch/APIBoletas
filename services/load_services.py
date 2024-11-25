@@ -1,3 +1,25 @@
+"""
+This module defines the `LoadServices` class, responsible for handling the logic related to
+a student's academic load. This includes retrieving their courses (subjects), applying ratings to
+those subjects, and enriching the academic load with subject information.
+
+Key Features:
+- Retrieves the student's academic load (CARGA) based on their enrollment number.
+- Applies ratings to the student's courses using the `Ratings` utility.
+- Merges subject data into the academic load by associating each course with additional subject details.
+
+Methods:
+- `_merge_topics`: Merges subject details from the `ASIGNATURA` model into the student's academic load.
+- `get_academic_loads`: Retrieves the student's academic load, applies ratings, and merges subject information.
+
+Exceptions:
+- The `exception_handler` decorator handles any exceptions raised during the execution of methods.
+
+Usage:
+This service is typically used to fetch a student's academic load, calculate ratings for their courses,
+and enhance the data by including subject details for reporting or analysis purposes.
+"""
+
 from models.load_model import CARGA
 from models.topic_model import ASIGNATURA
 from models.student_model import ALUMNO
@@ -16,10 +38,12 @@ class LoadServices:
         Merges the course (subject) data into the student's academic load.
 
         Args:
-            obj (ALUMNO): The student object whose courses (CARGA) will be enriched with subject details.
+            obj (ALUMNO): The student object whose courses (CARGA) will be
+            enriched with subject details.
 
         Returns:
-            None: This method modifies the student's CARGA attribute in place by merging subject data.
+            None: This method modifies the student's CARGA attribute in place
+            by merging subject data.
 
         Steps:
             1. Iterates over each course in the student's CARGA (academic load).

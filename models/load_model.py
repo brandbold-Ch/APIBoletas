@@ -1,7 +1,24 @@
-from models.student_model import ALUMNO
-from dbfmapper.model import Model
+"""
+This module defines the `CARGA` model, which represents the academic load of students,
+including grades, absences, and other academic performance indicators. The data is mapped
+to a DBF file that stores records related to partial exams, absences, and additional information.
+
+Key Features:
+- Links academic load records to the `ALUMNO` model through the `MATRICULA` field.
+- Provides attributes for managing grades across multiple partial exams, absences,
+  and average calculations.
+- Includes additional fields for specific academic load identifiers and performance observations.
+
+Usage:
+This model is designed for use with the `dbfmapper` library, providing an easy way to manage
+academic load records from DBF files. It can be integrated with other models to manage and analyze
+students' academic performance, grades, and attendance.
+"""
+
 from typing import Annotated
 from os import path
+from dbfmapper.model import Model
+from models.student_model import ALUMNO
 
 
 class CARGA(Model):
@@ -25,8 +42,10 @@ class CARGA(Model):
         PARCIAL_3 (str): The grade for the third partial exam.
         FALTAS_3 (int): The number of absences during the third partial exam.
         PROMEDIO (float): The average grade across all partial exams.
-        OBSERVA (str): Any additional observations or comments about the student's academic performance.
-        PALABRA (str): Possibly a keyword or code related to the student's academic or disciplinary record.
+        OBSERVA (str): Any additional observations or comments about the student's
+        academic performance.
+        PALABRA (str): Possibly a keyword or code related to the student's academic
+        or disciplinary record.
     """
     __ctx__ = path.abspath(path.join(path.dirname(__file__), "../db/cargas.dbf"))
 

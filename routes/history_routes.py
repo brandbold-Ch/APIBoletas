@@ -1,9 +1,36 @@
-from services.history_services import HistoryServices
+"""
+This file defines the routes for retrieving academic history records of students in the API.
+
+It includes two endpoints:
+
+1. `/histories/` - Retrieves detailed academic history records for a student based on their
+   enrollment ID, academic rank, and specific partial exam period (1 to 3).
+
+2. `/histories/semiannual/` - Retrieves semiannual academic history records for a student
+   based on their enrollment ID and academic rank.
+
+The routes use Bearer token authentication to ensure that only authorized users can access
+the data. The `CustomHTTPBearer` is used to handle the authentication process.
+
+The `HistoryServices` class is responsible for retrieving and formatting the academic history
+data, which is then returned as a `JSONResponse`.
+
+Dependencies:
+    - Bearer Token Authentication: Required for both routes.
+    - Valid enrollment ID, rank, and partial exam period (for `/histories/`) or rank (for
+      `/histories/semiannual/`).
+
+Example Requests:
+    - GET {enrollment}/histories/?rank=3&partial=2
+    - GET {enrollment}/histories/semiannual/?rank=3
+"""
+
+from typing import Annotated
 from fastapi import APIRouter, Path, Query, Depends
 from fastapi.responses import JSONResponse
-from utils.token import CustomHTTPBearer
 from fastapi.requests import Request
-from typing import Annotated
+from utils.token import CustomHTTPBearer
+from services.history_services import HistoryServices
 
 history_routes = APIRouter()
 history = HistoryServices()

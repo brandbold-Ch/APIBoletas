@@ -1,3 +1,30 @@
+"""
+This module defines custom exceptions to handle specific server-side errors
+in a structured and descriptive manner. Each exception class inherits from
+the base `ServerBaseException`, which standardizes the attributes and behavior
+for all custom exceptions.
+
+Key Features:
+- Provides meaningful error messages, HTTP status codes, and custom error codes.
+- Facilitates easier debugging and user feedback by encapsulating error details.
+- Covers a variety of scenarios, including:
+  - Missing entities (`NotFoundEntity`).
+  - Validation issues, such as mismatched passwords (`PasswordsDoNotMatch`).
+  - Database operation failures (`DatabaseError`).
+  - Token-related errors, such as missing, expired, or invalid tokens.
+
+Attributes for Each Exception:
+- `message`: A descriptive message for the error.
+- `http_argument`: A string representation of the HTTP status.
+- `error_code`: A custom error code for identifying the error type.
+- `status_code`: The corresponding HTTP status code.
+
+Usage:
+These exceptions can be raised within the application to handle specific
+error scenarios and provide consistent error responses to clients.
+"""
+
+
 class ServerBaseException(Exception):
     """
     Base class for server-specific exceptions.
@@ -100,7 +127,7 @@ class PasswordsDoNotMatch(ServerBaseException):
         self.http_argument = "Unauthorized 🚫"
 
 
-class DatabaseError(ServerBaseException):
+class ServerError(ServerBaseException):
     """
     Exception raised for database read/write errors.
 
@@ -179,12 +206,16 @@ class IncorrectUserError(ServerBaseException):
     Exception raised when the token does not correspond to the user.
 
     Attributes:
-        message (str): The error message (default is "The token does not correspond to the student, you are ridiculous. 🙂‍↕️").
+        message (str): The error message (default is "The token does not
+        correspond to the student, you are ridiculous. 🙂‍↕️").
         error_code (int): Custom error code for incorrect user token (default is 1209).
         status_code (int): HTTP status code for unauthorized (default is 401).
         http_argument (str): HTTP status string ("Unauthorized 🚫").
     """
-    def __init__(self, message="The token does not correspond to the student, you are ridiculous. 🙂‍↕️") -> None:
+    def __init__(
+            self,
+            message="The token does not correspond to the student, you are ridiculous. 🙂‍↕️"
+    ) -> None:
         super().__init__(message)
         self.add_note("El token que mandas no corresponde con el alumno.")
         self.error_code = 1209

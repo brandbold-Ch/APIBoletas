@@ -1,13 +1,26 @@
-from errors.errors import IncorrectUserError
-from fastapi.requests import Request
-from utils.token import verify_token
+"""
+This module provides an authentication decorator for FastAPI to validate requests.
+
+The primary functionality of this module is:
+- Validating JWT tokens from the 'Authorization' header in incoming requests.
+- Ensuring that the user enrollment in the token matches the expected enrollment.
+
+Components:
+- The `authenticate` decorator: Wraps a function to add authentication logic.
+- Custom error handling: Raises `IncorrectUserError` if validation fails.
+"""
+
 from functools import wraps
 from typing import Callable
+from fastapi.requests import Request
+from errors.errors import IncorrectUserError
+from utils.token import verify_token
 
 
 def authenticate(func: Callable) -> Callable:
     """
-    A decorator to authenticate requests based on a token and user enrollment information.
+    A decorator to authenticate requests based on a token and user
+    enrollment information.
 
     This decorator validates the JWT token provided in the 'Authorization' header of the request
     and checks whether the user enrollment matches the enrollment specified in the request.
@@ -28,7 +41,8 @@ def authenticate(func: Callable) -> Callable:
 
         Args:
             *args: Positional arguments passed to the decorated function.
-            **kwargs: Keyword arguments passed to the decorated function. It must include the 'request'
+            **kwargs: Keyword arguments passed to the decorated function.
+                      It must include the 'request'
                       object from FastAPI and the 'enrollment' key for comparison.
 
         Returns:
@@ -42,6 +56,6 @@ def authenticate(func: Callable) -> Callable:
 
         if user_req["enrollment"] == kwargs.get("enrollment"):
             return await func(*args, **kwargs)
-        else:
-            raise IncorrectUserError()
+        raise IncorrectUserError()
+
     return wrapper
