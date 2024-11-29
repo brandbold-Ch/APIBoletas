@@ -17,8 +17,6 @@ Components:
 """
 
 from typing import Annotated
-from os import getenv
-from dotenv import load_dotenv
 from fastapi import FastAPI, Request, File, UploadFile, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,7 +25,7 @@ from routes.auth_routes import auth_routes
 from routes.load_routes import load_routes
 from routes.history_routes import history_routes
 from errors.errors import ServerBaseException, ServerError, TokenNotAllowed
-
+from utils.config import Config
 
 app = FastAPI(
     title="COBACH Plantel 2️⃣1️⃣7️⃣ Soconusco. 🏫",
@@ -83,9 +81,8 @@ async def load_dbf(
     Returns:
         JSONResponse: A response indicating the success or failure of the database load operation.
     """
-    load_dotenv()
 
-    if access == getenv("ACCESS_TOKEN"):
+    if access == Config.ACCESS_TOKEN:
         read_data = await dbf_data.read()
 
         try:

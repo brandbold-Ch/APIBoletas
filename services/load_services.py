@@ -24,21 +24,21 @@ from models.load_model import CARGA
 from models.topic_model import ASIGNATURA
 from models.student_model import ALUMNO
 from decorators.handlers import exception_handler
-from utils.rating_tools import Ratings
+from decorators.ratings import get_ratings
 
 
-class LoadServices:
+class ChargeServices:
     """
     LoadServices handles the logic related to a student's academic load, such as retrieving their
     courses (subjects) and assigning ratings to those subjects.
     """
 
-    def _merge_topics(self, obj: ALUMNO) -> None:
+    def _merge_topics(self, ref: ALUMNO) -> None:
         """
         Merges the course (subject) data into the student's academic load.
 
         Args:
-            obj (ALUMNO): The student object whose courses (CARGA) will be
+            ref (ALUMNO): The student object whose courses (CARGA) will be
             enriched with subject details.
 
         Returns:
@@ -50,13 +50,14 @@ class LoadServices:
             2. For each course, it fetches additional data about the subject (ASIGNATURA) using the
                course's CLAVE_IN and adds this information to the respective course in CARGA.
         """
-        for load in obj.CARGA:
-            load["DATOS_MATERIA"] = ASIGNATURA().get_all(
-                CLAVE_IN=load["CLAVE_IN"], easy_view=True
+        for charge in getattr(ref, "CARGA"):
+            charge["DATOS_MATERIA"] = ASIGNATURA().get_all(
+                CLAVE_IN=charge["CLAVE_IN"], easy_view=True
             )[-1]
 
     @exception_handler
-    def get_academic_loads(self, enrollment: str, partial: int) -> ALUMNO:
+    @get_ratings
+    def get_academic_load(self, enrollment: str, partial: int) -> ALUMNO:
         """
         Retrieves the academic load for a given student, applies ratings to their courses,
         and enriches the courses with subject information.
@@ -75,7 +76,6 @@ class LoadServices:
             4. Returns the student object with the updated academic load.
         """
         student = ALUMNO().get(MATRICULA=enrollment, relates=True, exclude=["HISTORIAL"])
-        Ratings(student.CARGA, partial) + student
         self._merge_topics(student)
 
         return student

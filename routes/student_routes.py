@@ -28,7 +28,7 @@ from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 from services.student_services import StudentServices
 from decorators.authenticator import authenticate
-from utils.token import CustomHTTPBearer
+from utils.token_tools import CustomHTTPBearer
 
 student_routes = APIRouter()
 student = StudentServices()

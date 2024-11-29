@@ -27,7 +27,8 @@ Dependencies:
 - `fastapi.security.HTTPBearer` and `HTTPAuthorizationCredentials`: For handling Bearer token security in FastAPI.
 - Custom error classes (`NotFoundTokenError`, `ExpiredTokenError`, `InvalidTokenError`) to handle specific token errors.
 
-The utility functions and custom bearer class allow FastAPI to securely handle and authenticate requests using Bearer tokens.
+The utility functions and custom bearer class allow FastAPI to securely handle and authenticate requests using Bearer
+tokens.
 """
 
 from datetime import datetime, timedelta
@@ -35,6 +36,7 @@ from fastapi.requests import Request
 from jose import jwt, JWTError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from errors.errors import NotFoundTokenError, ExpiredTokenError, InvalidTokenError
+from utils.config import Config
 
 
 class CustomHTTPBearer(HTTPBearer):
@@ -74,7 +76,7 @@ class CustomHTTPBearer(HTTPBearer):
         return credentials
 
 
-def create_token(payload) -> str:
+def create_token(payload: dict) -> str:
     """
     Creates a JWT token with the provided payload and an expiration date.
 
@@ -88,13 +90,13 @@ def create_token(payload) -> str:
     Returns:
         str: The encoded JWT token as a string.
     """
-    expire = datetime.utcnow() + timedelta(days=7)
+    expire = datetime.utcnow() + timedelta(days=Config.TOKEN_EXPIRE_DAYS)
     payload.update({"exp": expire})
 
     return jwt.encode(
         payload,
-        "fArS619|QKL$",
-        algorithm="HS256"
+        Config.SECRET_KEY,
+        algorithm=Config.ALGORITHM
     )
 
 
@@ -117,11 +119,11 @@ def verify_token(token: str) -> dict:
         dict: The decoded payload of the JWT token if valid.
     """
     try:
-        decoded_token = jwt.decode(
-            token, "fArS619|QKL$",
-            algorithms=["HS256"]
+        return jwt.decode(
+            token, Config.SECRET_KEY,
+            algorithms=[Config.ALGORITHM]
         )
-        return decoded_token
+
     except JWTError as e:
         if str(e) == "Signature has expired.":
             raise ExpiredTokenError("Token has expired 💨") from e

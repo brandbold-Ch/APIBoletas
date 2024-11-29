@@ -16,7 +16,6 @@ Usage:
 Apply the `exception_handler` decorator to any function that interacts with the `dbfmapper` library
 to ensure exceptions are translated to custom application-specific exceptions.
 """
-
 from typing import Callable
 from dbfmapper.exception.exceptions import (
     NotFoundTable, DatabaseNotFound, DBFException
@@ -62,11 +61,12 @@ def exception_handler(func: Callable) -> Callable:
             return func(*args, **kwargs)
 
         except NotFoundTable as e:
-            raise NotFoundEntity(e) from e
+            raise NotFoundEntity(str(e)) from e
 
         except DatabaseNotFound as e:
-            raise ServerError(e) from e
+            raise ServerError(str(e)) from e
 
         except DBFException as e:
-            raise ServerError(e) from e
+            raise ServerError(str(e)) from e
+
     return wrapper

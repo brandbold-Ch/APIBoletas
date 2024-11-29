@@ -14,7 +14,7 @@ from functools import wraps
 from typing import Callable
 from fastapi.requests import Request
 from errors.errors import IncorrectUserError
-from utils.token import verify_token
+from utils.token_tools import verify_token
 
 
 def authenticate(func: Callable) -> Callable:

@@ -40,19 +40,19 @@ from typing import Annotated
 from fastapi import APIRouter, Path, Query, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
-from utils.token import CustomHTTPBearer
+from utils.token_tools import CustomHTTPBearer
 from decorators.authenticator import authenticate
-from services.load_services import LoadServices
+from services.load_services import ChargeServices
 from utils.tasks import check_student
 
 load_routes = APIRouter()
-load = LoadServices()
+load = ChargeServices()
 bearer = CustomHTTPBearer()
 
 
 @load_routes.get("/", dependencies=[Depends(bearer)])
 @authenticate
-async def get_academic_loads(
+async def get_academic_load(
         request: Request,
         background: BackgroundTasks,
         enrollment: Annotated[str, Path(max_length=15, min_length=15)],
@@ -98,7 +98,7 @@ async def get_academic_loads(
             "message": "Custom exception"
         }
     """
-    response = load.get_academic_loads(enrollment, partial).to_repr()
+    response = load.get_academic_load(enrollment, partial).to_repr()
     background.add_task(check_student, response)
 
     return JSONResponse(
@@ -109,7 +109,7 @@ async def get_academic_loads(
 
 @load_routes.get("/semiannual", dependencies=[Depends(bearer)])
 @authenticate
-async def get_semiannual_academic_loads(
+async def get_semiannual_academic_load(
         request: Request,
         background: BackgroundTasks,
         enrollment: Annotated[str, Path(max_length=15, min_length=15)],
@@ -150,7 +150,7 @@ async def get_semiannual_academic_loads(
                 "message": "Custom exception"
             }
         """
-    response = load.get_academic_loads(enrollment, 6).to_repr()
+    response = load.get_academic_load(enrollment, 6).to_repr()
     background.add_task(check_student, response)
 
     return JSONResponse(
