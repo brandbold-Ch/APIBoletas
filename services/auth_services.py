@@ -20,7 +20,7 @@ and returning a JWT token that can be used for further API requests.
 from decorators.handlers import exception_handler
 from errors.errors import PasswordsDoNotMatch
 from models.student_model import ALUMNO
-from utils.token import create_token
+from utils.token_tools import create_token
 
 
 class AuthServices:

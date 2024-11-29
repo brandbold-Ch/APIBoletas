@@ -99,9 +99,9 @@ class InvalidTimePeriod(ServerBaseException):
         status_code (int): HTTP status code for bad request (default is 400).
         http_argument (str): HTTP status string ("Bad Request ❓").
     """
-    def __init__(self, message="Invalid time period 🕓️") -> None:
+    def __init__(self, message="There is no data on that history. 📋️") -> None:
         super().__init__(message)
-        self.add_note("Periodo académico no completado.")
+        self.add_note("Periodo académico no completado o no existe el registro.")
 
         self.error_code = 1202
         self.status_code = 400
@@ -137,9 +137,9 @@ class ServerError(ServerBaseException):
         status_code (int): HTTP status code for internal server errors (default is 500).
         http_argument (str): HTTP status string ("Internal Server Error ❌").
     """
-    def __init__(self, message="Error reading or writing to database 💿🔄") -> None:
+    def __init__(self, message: str) -> None:
         super().__init__(message)
-        self.add_note("Error al leer o escribir en la base de datos.")
+        self.add_note("Húbo un error en el servidor")
 
         self.error_code = 1204
         self.status_code = 500

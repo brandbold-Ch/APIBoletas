@@ -1,9 +1,12 @@
 """
-This module defines the `Ratings` class, which is responsible for calculating and managing the academic ratings of students based on their partial exams and semiannual averages. It also includes a helper function to validate if all partial exams have been completed.
+This module defines the `Ratings` class, which is responsible for calculating and managing
+the academic ratings of students based on their partial exams and semiannual averages.
+It also includes a helper function to validate if all partial exams have been completed.
 
 Key Features:
 - Calculates ratings for each student based on their partial exam results and semiannual averages.
-- Provides detailed information on student performance, including word equivalents and status ("APROBADO" or "REPROBADO").
+- Provides detailed information on student performance, including word equivalents and status
+("APROBADO" or "REPROBADO").
 - Handles incomplete exams by raising an `InvalidTimePeriod` exception.
 
 Functions:
@@ -40,8 +43,7 @@ Example:
     On failure:
         Raises an `InvalidTimePeriod` exception if exams are incomplete.
 """
-
-from errors.errors import InvalidTimePeriod
+from errors.errors import InvalidTimePeriod, ServerError
 
 
 def validate_partials(partials: list[str]) -> bool:
@@ -56,11 +58,7 @@ def validate_partials(partials: list[str]) -> bool:
         bool: True if all partials are completed, False otherwise.
     """
     partials = [False if x == 'None' else True for x in partials]
-
-    if all(partials):
-        return True
-
-    return False
+    return all(partials)
 
 
 class Ratings:
@@ -140,8 +138,11 @@ class Ratings:
 
             raise InvalidTimePeriod("You have not completed the three partials 🕓️")
 
-        except ZeroDivisionError:
-            pass
+        except ZeroDivisionError as e:
+            raise ServerError(str(e)) from e
+
+        except IndexError:
+            raise InvalidTimePeriod("There is no data on that history. 📋️")
 
     def _calculate_partials(self) -> dict:
         """
@@ -163,6 +164,9 @@ class Ratings:
             rating, faults = 0.0, 0
             chunk = f"PARCIAL_{self.partial}"
 
+            if len(self.reports) == 0:
+                raise InvalidTimePeriod()
+
             for item in self.reports:
                 if item[chunk] != "None":
                     item["PALABRA"], item["OBSERVA"] = self.ratings[item[chunk]]
@@ -176,8 +180,8 @@ class Ratings:
                 "TOTAL_FALTAS": faults,
                 "PROMEDIO_FINAL": float(f"{rating / len(self.reports):.2f}")
             }
-        except ZeroDivisionError:
-            pass
+        except ZeroDivisionError as e:
+            raise ServerError(str(e)) from e
 
     def __add__(self, other):
         """
@@ -201,7 +205,7 @@ class Ratings:
             details = self._calculate_semiannual()
 
         elif self.partial == 0:
-            return None
+            return other
 
         setattr(other, "DETALLES", details)
         return other
