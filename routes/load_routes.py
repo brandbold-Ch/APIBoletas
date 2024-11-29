@@ -42,11 +42,11 @@ from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 from utils.token_tools import CustomHTTPBearer
 from decorators.authenticator import authenticate
-from services.load_services import ChargeServices
+from services.load_services import LoadServices
 from utils.tasks import check_student
 
 load_routes = APIRouter()
-load = ChargeServices()
+load = LoadServices()
 bearer = CustomHTTPBearer()
 
 

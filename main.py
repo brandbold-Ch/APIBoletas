@@ -95,7 +95,7 @@ async def load_dbf(
             )
 
         except Exception as e:
-            raise ServerError() from e
+            raise ServerError(str(e)) from e
 
     raise TokenNotAllowed()
 

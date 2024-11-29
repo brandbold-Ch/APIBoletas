@@ -27,7 +27,7 @@ from decorators.handlers import exception_handler
 from decorators.ratings import get_ratings
 
 
-class ChargeServices:
+class LoadServices:
     """
     LoadServices handles the logic related to a student's academic load, such as retrieving their
     courses (subjects) and assigning ratings to those subjects.
