@@ -4,3 +4,4 @@
 /db/HISTORIALES.dbf
 .venv
 __pycache__/
+.env

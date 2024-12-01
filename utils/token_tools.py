@@ -82,7 +82,7 @@ def create_token(payload: dict) -> str:
 
     This function generates a token that includes the provided payload and an
     expiration date set to 7 days from the current time. The token is encoded using
-    the HS256 algorithm and a predefined secret key.
+    the HS512 algorithm and a predefined secret key.
 
     Args:
         payload (dict): The payload data to be encoded in the JWT token.
@@ -126,5 +126,5 @@ def verify_token(token: str) -> dict:
 
     except JWTError as e:
         if str(e) == "Signature has expired.":
-            raise ExpiredTokenError("Token has expired 💨") from e
+            raise ExpiredTokenError() from e
         raise InvalidTokenError() from e
