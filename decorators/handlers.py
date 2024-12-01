@@ -20,7 +20,8 @@ from typing import Callable
 from dbfmapper.exception.exceptions import (
     NotFoundTable, DatabaseNotFound, DBFException
 )
-from errors.errors import NotFoundEntity, ServerError
+from errors.errors import NotFoundStudent, ServerError
+from utils.logging_config import app_logger
 
 
 def exception_handler(func: Callable) -> Callable:
@@ -61,12 +62,15 @@ def exception_handler(func: Callable) -> Callable:
             return func(*args, **kwargs)
 
         except NotFoundTable as e:
-            raise NotFoundEntity(str(e)) from e
+            app_logger.error(f"Error on <exception_handler, NotFoundTable>: {str(e)}")
+            raise NotFoundStudent() from e
 
         except DatabaseNotFound as e:
+            app_logger.critical(f"Error on <exception_handler, DatabaseNotFound>: {str(e)}")
             raise ServerError(str(e)) from e
 
         except DBFException as e:
+            app_logger.critical(f"Error on <exception_handler, DatabaseNotFound>: {str(e)}")
             raise ServerError(str(e)) from e
 
     return wrapper

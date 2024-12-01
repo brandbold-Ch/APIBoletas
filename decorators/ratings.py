@@ -13,6 +13,7 @@ Dependencies:
 - ALUMNO model for student data management.
 - Ratings utility for academic load evaluation.
 """
+
 from typing import Callable
 from utils.rating_tools import Ratings
 from models.student_model import ALUMNO

@@ -27,6 +27,7 @@ class Config:
         ACCESS_TOKEN (str): Default access token key for authentication.
         ALGORITHM (str): Algorithm used for token generation (e.g., "HS256", "HS512").
         TOKEN_EXPIRE_DAYS (int): Number of days until the token expires.
+        URL_REDIS (str): URL of redis.
     """
     load_dotenv()
 
@@ -34,3 +35,4 @@ class Config:
     ACCESS_TOKEN = getenv("ACCESS_TOKEN")
     ALGORITHM = getenv("ALGORITHM")
     TOKEN_EXPIRE_DAYS = int(getenv("TOKEN_EXPIRE_DAYS"))
+    URL_REDIS = getenv("URL_REDIS")

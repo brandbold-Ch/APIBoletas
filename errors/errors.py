@@ -70,7 +70,7 @@ class ServerBaseException(Exception):
         }
 
 
-class NotFoundEntity(ServerBaseException):
+class NotFoundStudent(ServerBaseException):
     """
     Exception raised when an entity is not found.
 
@@ -80,9 +80,9 @@ class NotFoundEntity(ServerBaseException):
         status_code (int): HTTP status code for not found errors (default is 404).
         http_argument (str): HTTP status string ("Not Found 🚫").
     """
-    def __init__(self, message="Entity not found 🤷") -> None:
+    def __init__(self, message="Student not found 🧑‍🎓") -> None:
         super().__init__(message)
-        self.add_note("La entidad no existe.")
+        self.add_note("El estudiante no existe.")
 
         self.error_code = 1201
         self.status_code = 404
@@ -196,6 +196,7 @@ class InvalidTokenError(ServerBaseException):
     def __init__(self, message="The token is invalid 🔏") -> None:
         super().__init__(message)
         self.add_note("El token es inválido.")
+
         self.error_code = 1208
         self.status_code = 400
         self.http_argument = "Bad Request ❓"
@@ -218,6 +219,7 @@ class IncorrectUserError(ServerBaseException):
     ) -> None:
         super().__init__(message)
         self.add_note("El token que mandas no corresponde con el alumno.")
+
         self.error_code = 1209
         self.status_code = 401
         self.http_argument = "Unauthorized 🚫"
@@ -236,6 +238,7 @@ class TokenNotAllowed(ServerBaseException):
     def __init__(self, message="Token not allowed 🔑") -> None:
         super().__init__(message)
         self.add_note("No puedes subir bases de datos.")
+
         self.error_code = 1210
         self.status_code = 401
         self.http_argument = "Unauthorized 🚫"
