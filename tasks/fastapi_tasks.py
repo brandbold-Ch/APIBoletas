@@ -24,7 +24,7 @@ from models.history_model import HISTORIAL
 histories = HistoryServices()
 
 
-def check_student(student: dict) -> None:
+def check_student_history(student: dict) -> None:
     """
     Checks if the student's historical data exists and updates or creates
     new history records accordingly.
