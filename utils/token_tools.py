@@ -36,7 +36,7 @@ from fastapi.requests import Request
 from jose import jwt, JWTError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from errors.errors import NotFoundTokenError, ExpiredTokenError, InvalidTokenError
-from utils.config import Config
+from utils.config_secrets import Config
 
 
 class CustomHTTPBearer(HTTPBearer):

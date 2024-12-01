@@ -25,7 +25,8 @@ from routes.auth_routes import auth_routes
 from routes.load_routes import load_routes
 from routes.history_routes import history_routes
 from errors.errors import ServerBaseException, ServerError, TokenNotAllowed
-from utils.config import Config
+from utils.config_secrets import Config
+from middlewares.logging_middleware import LoggingMiddleware
 
 app = FastAPI(
     title="COBACH Plantel 2️⃣1️⃣7️⃣ Soconusco. 🏫",
@@ -39,6 +40,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+app.add_middleware(LoggingMiddleware)
 
 
 @app.exception_handler(ServerBaseException)
@@ -96,7 +99,7 @@ async def load_dbf(
 
         except Exception as e:
             raise ServerError(str(e)) from e
-
+    
     raise TokenNotAllowed()
 
 

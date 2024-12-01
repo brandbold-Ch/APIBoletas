@@ -43,7 +43,7 @@ from fastapi.requests import Request
 from utils.token_tools import CustomHTTPBearer
 from decorators.authenticator import authenticate
 from services.load_services import LoadServices
-from utils.tasks import check_student
+from tasks.fastapi_tasks import check_student_history
 
 load_routes = APIRouter()
 load = LoadServices()
@@ -99,7 +99,7 @@ async def get_academic_load(
         }
     """
     response = load.get_academic_load(enrollment, partial).to_repr()
-    background.add_task(check_student, response)
+    background.add_task(check_student_history, response)
 
     return JSONResponse(
         status_code=200,
@@ -151,7 +151,7 @@ async def get_semiannual_academic_load(
             }
         """
     response = load.get_academic_load(enrollment, 6).to_repr()
-    background.add_task(check_student, response)
+    background.add_task(check_student_history, response)
 
     return JSONResponse(
         status_code=200,
