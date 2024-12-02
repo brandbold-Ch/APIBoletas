@@ -31,6 +31,7 @@ from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 from utils.token_tools import CustomHTTPBearer
 from services.history_services import HistoryServices
+from decorators.authenticator import authenticate
 
 history_routes = APIRouter()
 history = HistoryServices()
@@ -38,6 +39,7 @@ bearer = CustomHTTPBearer()
 
 
 @history_routes.get("/", dependencies=[Depends(bearer)])
+@authenticate
 async def get_academic_histories(
         request: Request,
         enrollment: Annotated[str, Path(max_length=15, min_length=15)],
@@ -81,6 +83,7 @@ async def get_academic_histories(
 
 
 @history_routes.get("/semiannual", dependencies=[Depends(bearer)])
+@authenticate
 async def get_semiannual_academic_histories(
         request: Request,
         enrollment: Annotated[str, Path(max_length=15, min_length=15)],
