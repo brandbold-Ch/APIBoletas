@@ -4,3 +4,7 @@
 /db/HISTORIALES.dbf
 .venv
 __pycache__/
+.env
+endpoints_test.py
+server_exceptions.log
+celerybeat-schedule

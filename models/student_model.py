@@ -1,6 +1,4 @@
 """
-student_model.py
-
 This module defines the `ALUMNO` model, representing student information within the academic
 system. It maps to a DBF file containing detailed student records, such as personal and academic
 information, including names, CURP, grade, group, and enrollment status.

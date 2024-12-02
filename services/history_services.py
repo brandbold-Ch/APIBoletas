@@ -19,7 +19,7 @@ which can then be used for analysis or reporting purposes.
 from decorators.handlers import exception_handler
 from models.history_model import HISTORIAL
 from models.student_model import ALUMNO
-from utils.rating_tools import Ratings
+from decorators.ratings import get_ratings
 
 
 class HistoryServices:
@@ -29,7 +29,8 @@ class HistoryServices:
     """
 
     @exception_handler
-    def get_histories(self, enrollment: str, rank: str, partial: int) -> ALUMNO:
+    @get_ratings
+    def get_histories(self, enrollment: str, partial: int, rank: str) -> ALUMNO:
         """
         Fetches a student's academic history based on their enrollment, grade rank, and partial.
 
@@ -50,8 +51,10 @@ class HistoryServices:
             4. Return the updated student object with the academic history and calculated ratings.
         """
         student = ALUMNO().get(MATRICULA=enrollment)
-        student.HISTORIAL = HISTORIAL().get_all(MATRICULA=enrollment, GRADO=rank, easy_view=True)
-        Ratings(student.HISTORIAL, partial) + student
+        setattr(
+            student, "HISTORIAL",
+            HISTORIAL().get_all(MATRICULA=enrollment, GRADO=rank, easy_view=True)
+        )
 
         return student
     

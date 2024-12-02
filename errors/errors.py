@@ -70,7 +70,7 @@ class ServerBaseException(Exception):
         }
 
 
-class NotFoundEntity(ServerBaseException):
+class NotFoundStudent(ServerBaseException):
     """
     Exception raised when an entity is not found.
 
@@ -80,9 +80,9 @@ class NotFoundEntity(ServerBaseException):
         status_code (int): HTTP status code for not found errors (default is 404).
         http_argument (str): HTTP status string ("Not Found 🚫").
     """
-    def __init__(self, message="Entity not found 🤷") -> None:
+    def __init__(self, message="Student not found 🧑‍🎓") -> None:
         super().__init__(message)
-        self.add_note("La entidad no existe.")
+        self.add_note("El estudiante no existe.")
 
         self.error_code = 1201
         self.status_code = 404
@@ -99,9 +99,9 @@ class InvalidTimePeriod(ServerBaseException):
         status_code (int): HTTP status code for bad request (default is 400).
         http_argument (str): HTTP status string ("Bad Request ❓").
     """
-    def __init__(self, message="Invalid time period 🕓️") -> None:
+    def __init__(self, message="There is no data on that history. 📋️") -> None:
         super().__init__(message)
-        self.add_note("Periodo académico no completado.")
+        self.add_note("Periodo académico no completado o no existe el registro.")
 
         self.error_code = 1202
         self.status_code = 400
@@ -137,9 +137,9 @@ class ServerError(ServerBaseException):
         status_code (int): HTTP status code for internal server errors (default is 500).
         http_argument (str): HTTP status string ("Internal Server Error ❌").
     """
-    def __init__(self, message="Error reading or writing to database 💿🔄") -> None:
+    def __init__(self, message: str) -> None:
         super().__init__(message)
-        self.add_note("Error al leer o escribir en la base de datos.")
+        self.add_note("Húbo un error en el servidor")
 
         self.error_code = 1204
         self.status_code = 500
@@ -196,6 +196,7 @@ class InvalidTokenError(ServerBaseException):
     def __init__(self, message="The token is invalid 🔏") -> None:
         super().__init__(message)
         self.add_note("El token es inválido.")
+
         self.error_code = 1208
         self.status_code = 400
         self.http_argument = "Bad Request ❓"
@@ -218,6 +219,7 @@ class IncorrectUserError(ServerBaseException):
     ) -> None:
         super().__init__(message)
         self.add_note("El token que mandas no corresponde con el alumno.")
+
         self.error_code = 1209
         self.status_code = 401
         self.http_argument = "Unauthorized 🚫"
@@ -236,6 +238,7 @@ class TokenNotAllowed(ServerBaseException):
     def __init__(self, message="Token not allowed 🔑") -> None:
         super().__init__(message)
         self.add_note("No puedes subir bases de datos.")
+
         self.error_code = 1210
         self.status_code = 401
         self.http_argument = "Unauthorized 🚫"
