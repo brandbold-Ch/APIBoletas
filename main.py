@@ -17,7 +17,7 @@ Components:
 """
 
 from typing import Annotated
-from fastapi import FastAPI, Request, File, UploadFile, Query
+from fastapi import FastAPI, Request, File, UploadFile, Query, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from routes.student_routes import student_routes
@@ -25,6 +25,7 @@ from routes.auth_routes import auth_routes
 from routes.load_routes import load_routes
 from routes.history_routes import history_routes
 from errors.errors import ServerBaseException, ServerError, TokenNotAllowed
+from tasks.fastapi_tasks import each_student
 from utils.config_secrets import Config
 from middlewares.logging_middleware import LoggingMiddleware
 
@@ -67,6 +68,7 @@ async def server_base_exception_handler(request: Request, exc: ServerBaseExcepti
 
 @app.post("/load-database")
 async def load_dbf(
+        background: BackgroundTasks,
         dbf_data: Annotated[UploadFile, File(...)],
         access: Annotated[str, Query(...)]
 ) -> JSONResponse:
@@ -83,6 +85,9 @@ async def load_dbf(
 
     Returns:
         JSONResponse: A response indicating the success or failure of the database load operation.
+        :param access:
+        :param dbf_data:
+        :param background:
     """
 
     if access == Config.ACCESS_TOKEN:
@@ -91,6 +96,8 @@ async def load_dbf(
         try:
             with open(f"db/{dbf_data.filename}", "wb") as dbf:
                 dbf.write(read_data)
+
+            background.add_task(each_student)
 
             return JSONResponse(
                 status_code=202,
