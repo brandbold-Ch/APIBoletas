@@ -48,3 +48,4 @@ class ASIGNATURA(Model):
         self.ASIGNATURA = None
         self.CLAVE = None
         self.CLAVE_IN = None
+        self.PERIODO = None

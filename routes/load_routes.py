@@ -99,7 +99,7 @@ async def get_academic_load(
         }
     """
     response = load.get_academic_load(enrollment, partial).to_repr()
-    background.add_task(check_student_history, response)
+    #background.add_task(check_student_history, response)
 
     return JSONResponse(
         status_code=200,
@@ -151,7 +151,7 @@ async def get_semiannual_academic_load(
             }
         """
     response = load.get_academic_load(enrollment, 6).to_repr()
-    background.add_task(check_student_history, response)
+    #background.add_task(check_student_history, response)
 
     return JSONResponse(
         status_code=200,
