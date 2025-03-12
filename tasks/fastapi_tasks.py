@@ -30,10 +30,10 @@ load_services = LoadServices()
 
 
 def each_student():
-    students_loads = Table("db/Alumnos.dbf")
-    students_loads.open(mode=READ_ONLY)
+    students = Table("db/Alumnos.dbf")
+    students.open(mode=READ_ONLY)
 
-    for student in students_loads:
+    for student in students:
         for item in [1, 2, 3]:
             try:
                 user = load_services.get_academic_load(student.MATRICULA, item)
@@ -66,7 +66,6 @@ def check_student_history(student: dict) -> None:
     """
     data = HISTORIAL().get_all(MATRICULA=student["MATRICULA"], GRADO=student["GRADO"])
     loads = student["CARGA"]
-    print(data)
 
     if len(data) == 0:
         for load in loads:

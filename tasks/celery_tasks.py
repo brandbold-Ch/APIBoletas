@@ -34,21 +34,21 @@ def check_student_status() -> None:
     histories = Table("db/HISTORIALES.dbf")
     histories.open(mode=READ_WRITE)
 
-    student = Table("db/Alumnos.dbf")
-    student.open(mode=READ_ONLY)
+    students = Table("db/Alumnos.dbf")
+    students.open(mode=READ_ONLY)
 
     counter = 0
 
     try:
-        for item_1 in histories:
-            enrollment = item_1.MATRICULA
-            student_found = student.query(f"SELECT * WHERE matricula=='{enrollment}'")
+        for history in histories:
+            enrollment = history.MATRICULA
+            student = students.query(f"SELECT * WHERE matricula=='{enrollment}'")
 
-            if len(student_found) == 0:
-                histories_found = histories.query(f"SELECT * WHERE matricula=='{enrollment}'")
+            if len(student) == 0:
+                records = histories.query(f"SELECT * WHERE matricula=='{enrollment}'")
 
-                for item_2 in histories_found:
-                    delete(item_2)
+                for record in records:
+                    delete(record)
                     counter += 1
 
                 histories.pack()
@@ -60,4 +60,4 @@ def check_student_status() -> None:
 
     finally:
         histories.close()
-        student.close()
+        students.close()

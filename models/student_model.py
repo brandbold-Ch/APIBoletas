@@ -34,7 +34,7 @@ class ALUMNO(Model):
         GRUPO (str): The student's academic group.
         STATUSA (str): The student's status in the system (e.g., active, graduated, suspended).
     """
-    __ctx__ = path.abspath(path.join(path.dirname(__file__), "../db/Alumnos.dbf"))
+    __ctx__ = path.abspath(path.join(path.dirname(__file__), "../db/alumnos.dbf"))
 
     def __init__(self) -> None:
         """

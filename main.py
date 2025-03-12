@@ -32,11 +32,12 @@ from middlewares.logging_middleware import LoggingMiddleware
 app = FastAPI(
     title="COBACH Plantel 2️⃣1️⃣7️⃣ Soconusco. 🏫",
     description="API Rest para obtención de boletas académicas. 📃",
-    version="1.0.0"
+    version="1.0.0",
+    root_path="/api"
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://127.0.0.1"],
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
@@ -92,16 +93,18 @@ async def load_dbf(
 
     if access == Config.ACCESS_TOKEN:
         read_data = await dbf_data.read()
+        file_name = dbf_data.filename.lower()
 
         try:
-            with open(f"db/{dbf_data.filename}", "wb") as dbf:
+            with open(f"db/{file_name}", "wb") as dbf:
                 dbf.write(read_data)
 
-            background.add_task(each_student)
+            if dbf_data.filename == "cargas.dbf":
+                background.add_task(each_student)
 
             return JSONResponse(
                 status_code=202,
-                content={"status": f"Loaded database {dbf_data.filename} ✅"}
+                content={"status": f"Loaded database {file_name} ✅"}
             )
 
         except Exception as e:
