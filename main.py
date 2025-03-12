@@ -99,7 +99,7 @@ async def load_dbf(
             with open(f"db/{file_name}", "wb") as dbf:
                 dbf.write(read_data)
 
-            if dbf_data.filename == "cargas.dbf":
+            if file_name == "cargas.dbf":
                 background.add_task(each_student)
 
             return JSONResponse(
