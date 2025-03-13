@@ -32,7 +32,7 @@ class ASIGNATURA(Model):
         CLAVE_IN (str): An additional identifier for the subject, possibly
         used for categorization or linking to other data.
     """
-    __ctx__ = path.abspath(path.join(path.dirname(__file__), "../db/ASIGNATURAS.DBF"))
+    __ctx__ = path.abspath(path.join(path.dirname(__file__), "../db/asignaturas.dbf"))
 
     def __init__(self) -> None:
         """
