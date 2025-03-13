@@ -34,7 +34,7 @@ def check_student_status() -> None:
     histories = Table("db/HISTORIALES.dbf")
     histories.open(mode=READ_WRITE)
 
-    students = Table("db/Alumnos.dbf")
+    students = Table("db/alumnos.dbf")
     students.open(mode=READ_ONLY)
 
     counter = 0

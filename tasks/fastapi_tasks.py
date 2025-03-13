@@ -30,7 +30,7 @@ load_services = LoadServices()
 
 
 def each_student():
-    students = Table("db/Alumnos.dbf")
+    students = Table("db/alumnos.dbf")
     students.open(mode=READ_ONLY)
 
     for student in students:
