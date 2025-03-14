@@ -139,7 +139,7 @@ class Ratings:
             raise InvalidTimePeriod("You have not completed the three partials 🕓️")
 
         except ZeroDivisionError as e:
-            raise ServerError(str(e)) from e
+            raise ServerError(e) from e
 
         except IndexError:
             raise InvalidTimePeriod("There is no data on that history. 📋️")
@@ -180,10 +180,11 @@ class Ratings:
                 "TOTAL_FALTAS": faults,
                 "PROMEDIO_FINAL": float(f"{rating / len(self.reports):.2f}")
             }
-        except ZeroDivisionError as e:
-            raise ServerError(str(e)) from e
 
-    def __add__(self, other):
+        except ZeroDivisionError as e:
+            raise ServerError(e) from e
+
+    def score(self, student: dict):
         """
         Adds the calculated ratings to the given student object.
 
@@ -195,6 +196,7 @@ class Ratings:
 
         Returns:
             The student object with the added "DETALLES" attribute.
+            :param student:
         """
         details = None
 
@@ -205,7 +207,7 @@ class Ratings:
             details = self._calculate_semiannual()
 
         elif self.partial == 0:
-            return other
+            return student
 
-        setattr(other, "DETALLES", details)
-        return other
+        student["DETALLES"] = details
+        return student

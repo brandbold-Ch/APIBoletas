@@ -70,4 +70,5 @@ async def get_student(
             "message": "Custom exception"
         }
     """
-    return JSONResponse(status_code=200, content=student.get_student(enrollment).to_repr())
+    return JSONResponse(status_code=200,
+                        content=await student.get_student(enrollment))

@@ -35,7 +35,7 @@ Example Requests:
     - GET {enrollment}/loads/?partial=2
     - GET {enrollment}/loads/semiannual
 """
-
+from functools import partial
 from typing import Annotated
 from fastapi import APIRouter, Path, Query, Depends, BackgroundTasks
 from fastapi.responses import JSONResponse
@@ -98,8 +98,7 @@ async def get_academic_load(
             "message": "Custom exception"
         }
     """
-    response = load.get_academic_load(enrollment, partial).to_repr()
-    #background.add_task(check_student_history, response)
+    response = await load.get_academic_load(enrollment, partial)
 
     return JSONResponse(
         status_code=200,
@@ -150,8 +149,7 @@ async def get_semiannual_academic_load(
                 "message": "Custom exception"
             }
         """
-    response = load.get_academic_load(enrollment, 6).to_repr()
-    #background.add_task(check_student_history, response)
+    response = await load.get_academic_load(enrollment=enrollment, partial=6)
 
     return JSONResponse(
         status_code=200,

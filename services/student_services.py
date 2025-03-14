@@ -20,7 +20,7 @@ This service is typically used to retrieve student data from the database based 
 The retrieved student object contains the necessary details such as name, enrollment, and other student-related
 attributes.
 """
-
+from db.connection import get_collection, Collection
 from decorators.handlers import exception_handler
 from models.student_model import ALUMNO
 
@@ -32,8 +32,11 @@ class StudentServices:
     exception handling and caching.
     """
 
+    def __init__(self):
+        self.student = get_collection(Collection.STUDENTS)
+
     @exception_handler
-    def get_student(self, enrollment: str) -> ALUMNO:
+    async def get_student(self, enrollment: str) -> dict:
         """
         Fetches a student's data based on their enrollment number (MATRICULA).
 
@@ -48,4 +51,4 @@ class StudentServices:
             @caching: Caches the result of this method to improve performance by
             avoiding repeated database queries for the same student data.
         """
-        return ALUMNO().get(MATRICULA=enrollment)
+        return await self.student.find_one({"MATRICULA": enrollment}, {"_id": 0})

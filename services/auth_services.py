@@ -16,10 +16,9 @@ Usage:
 This service is typically used to authenticate students by verifying their CURP and password
 and returning a JWT token that can be used for further API requests.
 """
-
+from db.connection import Collection, get_collection
 from decorators.handlers import exception_handler
-from errors.errors import PasswordsDoNotMatch
-from models.student_model import ALUMNO
+from errors.errors import PasswordsDoNotMatch, NotFoundStudent
 from utils.token_tools import create_token
 
 
@@ -28,8 +27,11 @@ class AuthServices:
     AuthServices handles user authentication logic, including login and token creation.
     """
 
+    def __init__(self) -> None:
+        self.student = get_collection(Collection.STUDENTS)
+
     @exception_handler
-    def login(self, username: str, password: str) -> dict:
+    async def login(self, username: str, password: str) -> dict:
         """
         Log in a student using their CURP (username) and password (enrollment number).
 
@@ -52,14 +54,18 @@ class AuthServices:
             3. If they match, create a JWT token.
             4. Return the token and the student data.
         """
-        student = ALUMNO().get(CURP=username)
+        student = await self.student.find_one({"CURP": username},
+                                              {"_id": 0})
 
-        if student.MATRICULA != password:
+        if student is None:
+            raise NotFoundStudent()
+
+        if student["MATRICULA"] != password:
             raise PasswordsDoNotMatch()
 
         return {
             "token": create_token({
                 "enrollment": password
             }),
-            "student_data": student.to_repr()
+            "student_data": student
         }

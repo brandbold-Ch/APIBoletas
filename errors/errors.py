@@ -23,6 +23,7 @@ Usage:
 These exceptions can be raised within the application to handle specific
 error scenarios and provide consistent error responses to clients.
 """
+from typing import Any
 
 
 class ServerBaseException(Exception):
@@ -42,8 +43,9 @@ class ServerBaseException(Exception):
         Args:
             message (str): The error message for this exception.
         """
-        super().__init__(message)
         self.original_message = str(message)
+
+        super().__init__(self.original_message)
         self.http_argument = None
         self.error_code = None
         self.status_code = None
@@ -137,7 +139,7 @@ class ServerError(ServerBaseException):
         status_code (int): HTTP status code for internal server errors (default is 500).
         http_argument (str): HTTP status string ("Internal Server Error ❌").
     """
-    def __init__(self, message: str) -> None:
+    def __init__(self, message: Any) -> None:
         super().__init__(message)
         self.add_note("Húbo un error en el servidor")
 

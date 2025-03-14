@@ -15,7 +15,6 @@ Components:
 - **Custom Exception Handlers**: Handle `ServerBaseException`, `DatabaseError`, and `TokenNotAllowed`.
 - **Environment Variables**: Loaded using `dotenv` to manage secrets and tokens.
 """
-
 from typing import Annotated
 from fastapi import FastAPI, Request, File, UploadFile, Query, BackgroundTasks
 from fastapi.responses import JSONResponse
@@ -25,7 +24,7 @@ from routes.auth_routes import auth_routes
 from routes.load_routes import load_routes
 from routes.history_routes import history_routes
 from errors.errors import ServerBaseException, ServerError, TokenNotAllowed
-from tasks.fastapi_tasks import each_student
+from tasks.fastapi_tasks import main, run_main
 from utils.config_secrets import Config
 from middlewares.logging_middleware import LoggingMiddleware
 
@@ -100,7 +99,7 @@ async def load_dbf(
                 dbf.write(read_data)
 
             if file_name == "cargas.dbf":
-                background.add_task(each_student)
+                await run_main()
 
             return JSONResponse(
                 status_code=202,
@@ -108,8 +107,9 @@ async def load_dbf(
             )
 
         except Exception as e:
-            raise ServerError(str(e)) from e
-    
+            print(type(e))
+            raise ServerError(e) from e
+
     raise TokenNotAllowed()
 
 

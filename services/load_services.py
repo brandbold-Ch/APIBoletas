@@ -19,12 +19,10 @@ Usage:
 This service is typically used to fetch a student's academic load, calculate ratings for their courses,
 and enhance the data by including subject details for reporting or analysis purposes.
 """
-
-from models.load_model import CARGA
-from models.topic_model import ASIGNATURA
 from models.student_model import ALUMNO
 from decorators.handlers import exception_handler
 from decorators.ratings import get_ratings
+from db.connection import get_collection, Collection
 
 
 class LoadServices:
@@ -33,7 +31,11 @@ class LoadServices:
     courses (subjects) and assigning ratings to those subjects.
     """
 
-    def _merge_topics(self, ref: ALUMNO) -> None:
+    def __init__(self) -> None:
+        self.students = get_collection(Collection.STUDENTS)
+        self.loads = get_collection(Collection.LOADS)
+
+    async def _merge_topics(self, student: dict) -> None:
         """
         Merges the course (subject) data into the student's academic load.
 
@@ -50,14 +52,13 @@ class LoadServices:
             2. For each course, it fetches additional data about the subject (ASIGNATURA) using the
                course's CLAVE_IN and adds this information to the respective course in CARGA.
         """
-        for charge in getattr(ref, "CARGA"):
-            charge["DATOS_MATERIA"] = ASIGNATURA().get_all(
-                CLAVE_IN=charge["CLAVE_IN"], easy_view=True
-            )[-1]
+        collection = get_collection(Collection.TOPICS)
+        for charge in student["CARGA"]:
+            topic = await collection.find({"CLAVE_IN": charge["CLAVE_IN"]}, {"_id": 0}).to_list(None)
+            charge["DATOS_MATERIA"] = topic[-1]
 
     @exception_handler
-    @get_ratings
-    def get_academic_load(self, enrollment: str, partial: int) -> ALUMNO:
+    async def get_academic_load(self, enrollment: str, partial: int) -> dict:
         """
         Retrieves the academic load for a given student, applies ratings to their courses,
         and enriches the courses with subject information.
@@ -75,7 +76,16 @@ class LoadServices:
             3. Merges the subject data (ASIGNATURA) into the student's academic load.
             4. Returns the student object with the updated academic load.
         """
-        student = ALUMNO().get(MATRICULA=enrollment, relates=True, exclude=["HISTORIAL"])
-        self._merge_topics(student)
+        student = await self.students.find_one({"MATRICULA": enrollment}, {"_id": 0})
+        student["CARGA"] = await self.loads.find({"MATRICULA": student["MATRICULA"]}, {"_id": 0}).to_list(None)
+        await self._merge_topics(student)
+        await get_ratings(enrollment, student, partial)
+        return student
 
+    @exception_handler
+    async def check_academic_load_for_task(self, enrollment: str = None,
+                                           student: dict = None, partial: int = None) -> dict:
+        student["CARGA"] = await self.loads.find({"MATRICULA": student["MATRICULA"]}).to_list(None)
+        await self._merge_topics(student)
+        await get_ratings(enrollment, student, partial)
         return student

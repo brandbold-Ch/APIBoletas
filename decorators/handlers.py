@@ -43,7 +43,7 @@ def exception_handler(func: Callable) -> Callable:
         NotFoundEntity: Raised when a `NotFoundTable` exception occurs.
         DatabaseError: Raised when a `DatabaseNotFound` or `DBFException` occurs.
     """
-    def wrapper(*args, **kwargs) -> Callable:
+    async def wrapper(*args, **kwargs) -> Callable:
         """
         Inner function to execute the wrapped function and handle specific exceptions.
 
@@ -59,7 +59,7 @@ def exception_handler(func: Callable) -> Callable:
             DatabaseError: Mapped from `DatabaseNotFound` or `DBFException`.
         """
         try:
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
 
         except NotFoundTable as e:
             app_logger.error(f"Error on <exception_handler, NotFoundTable>: {str(e)}")
@@ -67,10 +67,10 @@ def exception_handler(func: Callable) -> Callable:
 
         except DatabaseNotFound as e:
             app_logger.critical(f"Error on <exception_handler, DatabaseNotFound>: {str(e)}")
-            raise ServerError(str(e)) from e
+            raise ServerError(e) from e
 
         except DBFException as e:
             app_logger.critical(f"Error on <exception_handler, DatabaseNotFound>: {str(e)}")
-            raise ServerError(str(e)) from e
+            raise ServerError(e) from e
 
     return wrapper

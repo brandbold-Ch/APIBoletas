@@ -16,7 +16,7 @@ from dbf import Table, READ_WRITE, delete, READ_ONLY
 from utils.logging_config import app_logger
 
 
-@app.task
+@app.each_history
 def check_student_status() -> None:
     """
     Celery task that checks student status by comparing records in the 'HISTORIALES.dbf' and 'Alumnos.dbf' tables.

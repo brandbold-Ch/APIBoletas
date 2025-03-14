@@ -54,5 +54,5 @@ async def login(
     """
     return JSONResponse(
         status_code=200,
-        content=auth.login(username, password)
+        content=await auth.login(username, password)
     )

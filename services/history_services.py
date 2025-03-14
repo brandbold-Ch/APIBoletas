@@ -15,9 +15,8 @@ Usage:
 This service is typically used to fetch and calculate ratings for a student's academic history,
 which can then be used for analysis or reporting purposes.
 """
-
+from db.connection import get_collection, Collection
 from decorators.handlers import exception_handler
-from models.history_model import HISTORIAL
 from models.student_model import ALUMNO
 from decorators.ratings import get_ratings
 
@@ -28,9 +27,12 @@ class HistoryServices:
     retrieving, updating, and deleting academic records.
     """
 
+    def __init__(self) -> None:
+        self.student = get_collection(Collection.STUDENTS)
+        self.records = get_collection(Collection.RECORDS)
+
     @exception_handler
-    @get_ratings
-    def get_histories(self, enrollment: str, partial: int, rank: str) -> ALUMNO:
+    async def get_histories(self, enrollment: str, partial: int, rank: str) -> dict:
         """
         Fetches a student's academic history based on their enrollment, grade rank, and partial.
 
@@ -50,11 +52,9 @@ class HistoryServices:
             3. Apply ratings to the student's history using the `Ratings` utility.
             4. Return the updated student object with the academic history and calculated ratings.
         """
-        student = ALUMNO().get(MATRICULA=enrollment)
-        setattr(
-            student, "HISTORIAL",
-            HISTORIAL().get_all(MATRICULA=enrollment, GRADO=rank, easy_view=True)
-        )
-
+        student = await self.student.find_one({"MATRICULA": enrollment}, {"_id": 0})
+        student["HISTORIAL"] = await self.records.find({
+            "MATRICULA": enrollment, "GRADO": rank}, {"_id": 0}).to_list(None)
+        await get_ratings(enrollment, student, partial)
         return student
     

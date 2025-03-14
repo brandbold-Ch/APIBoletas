@@ -17,32 +17,106 @@ Dependencies:
 
 This file ensures that student historical records are complete and up-to-date for further processing or academic evaluation.
 """
-
-from dbf import Table, READ_ONLY
+import asyncio
+import itertools
+from dbf import Table, READ_ONLY, Record, FieldnameList
 from errors.errors import InvalidTimePeriod
-from models.load_model import CARGA
 from services.history_services import HistoryServices
-from models.history_model import HISTORIAL
 from services.load_services import LoadServices
+from db.connection import Collection, get_collection
 
 histories = HistoryServices()
 load_services = LoadServices()
 
 
-def each_student():
-    students = Table("db/alumnos.dbf")
-    students.open(mode=READ_ONLY)
+def asdict(ctx: Record, fields: FieldnameList) -> dict:
+    return {k: str(getattr(ctx, k)).strip() for k in fields}
 
-    for student in students:
-        for item in [1, 2, 3]:
+
+def create_collections(table: Table) -> list[dict]:
+    try:
+        return [asdict(record, table.field_names) for record in table]
+    except:
+        ...
+
+
+async def each_topic() -> None:
+    try:
+        collection = get_collection(Collection.TOPICS)
+        topics = Table("db/asignaturas.dbf")
+        topics.open(mode=READ_ONLY)
+
+        await collection.delete_many({})
+        await collection.insert_many(create_collections(topics))
+
+    except:
+        ...
+
+
+async def each_student() -> None:
+    try:
+        collection = get_collection(Collection.STUDENTS)
+        students = Table("db/alumnos.dbf")
+        students.open(mode=READ_ONLY)
+
+        await collection.delete_many({})
+        await collection.insert_many(create_collections(students))
+    except:
+        ...
+
+
+async def each_load() -> None:
+    try:
+        collection = get_collection(Collection.LOADS)
+        loads = Table("db/cargas.dbf")
+        loads.open(mode=READ_ONLY)
+
+        await collection.delete_many({})
+        await collection.insert_many(create_collections(loads))
+    except:
+        ...
+
+
+async def each_history() -> None:
+    collection = get_collection(Collection.STUDENTS)
+    students = await collection.find().to_list(None)
+
+    async def check_period(student) -> None:
+        for partial in [1, 2, 3]:
             try:
-                user = load_services.get_academic_load(student.MATRICULA, item)
-                check_student_history(user.to_repr())
-            except InvalidTimePeriod:
+                updated_student = await (load_services
+                                         .check_academic_load_for_task(student=student, partial=partial))
+                await check_student_history(updated_student)
+            except (InvalidTimePeriod, TypeError) as e:
                 ...
 
+    tasks = [asyncio.create_task(check_period(student)) for student in students]
+    await asyncio.gather(*tasks)
 
-def check_student_history(student: dict) -> None:
+
+async def update_records(records, loads, collection, student) -> None:
+    filtered_records = [record for record in records if record["GRADO"] == student["GRADO"]]
+    updates = []
+
+    for record, load in itertools.product(filtered_records, loads):
+        updates_dict = {}
+
+        for key in ["PARCIAL_1", "PARCIAL_2", "PARCIAL_3"]:
+            student_value = load[key]
+            record_value = record[key]
+
+            if student_value != "None" and record_value == "None":
+                updates_dict[key] = student_value
+
+        if updates_dict:
+            updates.append(collection.update_one({"_id": record["_id"]},
+                                                 {"$set": updates_dict}))
+
+    if updates:
+        await asyncio.gather(*updates)
+
+
+async def check_student_history(student: dict) -> None:
     """
     Checks if the student's historical data exists and updates or creates
     new history records accordingly.
@@ -64,39 +138,50 @@ def check_student_history(student: dict) -> None:
         None: This function does not return any value. It modifies the history
         records in the database directly.
     """
-    data = HISTORIAL().get_all(MATRICULA=student["MATRICULA"], GRADO=student["GRADO"])
+    collection = get_collection(Collection.RECORDS)
+    records = await collection.find({"MATRICULA": student["MATRICULA"],
+                                     "GRADO": student["GRADO"]}).to_list(None)
     loads = student["CARGA"]
 
-    if len(data) == 0:
-        for load in loads:
-            new_history = HISTORIAL()
-            new_history.MATRICULA = student["MATRICULA"]
-            new_history.GRUPO = student["GRUPO"]
-            new_history.GRADO = student["GRADO"]
-            new_history.CLAVEMAT = load["CLAVEMAT"]
-            new_history.ASIGNATURA = load["DATOS_MATERIA"]["ASIGNATURA"]
-            new_history.PARCIAL_1 = load["PARCIAL_1"]
-            new_history.PARCIAL_2 = load["PARCIAL_2"]
-            new_history.PARCIAL_3 = load["PARCIAL_3"]
-            new_history.save()
+    try:
+        if len(records) == 0:
+            doc = [
+                {
+                    "MATRICULA": student["MATRICULA"],
+                    "GRUPO": student["GRUPO"],
+                    "GRADO": student["GRADO"],
+                    "CLAVEMAT": load["CLAVEMAT"],
+                    "ASIGNATURA": load["DATOS_MATERIA"]["ASIGNATURA"],
+                    "PARCIAL_1": load["PARCIAL_1"],
+                    "PARCIAL_2": load["PARCIAL_2"],
+                    "PARCIAL_3": load["PARCIAL_3"]
+                } for load in loads
+            ]
+            await collection.insert_many(doc)
 
-    else:
-        for index, history in enumerate(data):
-            student_partial_1 = loads[index]["PARCIAL_1"]
-            student_partial_2 = loads[index]["PARCIAL_2"]
-            student_partial_3 = loads[index]["PARCIAL_3"]
+        else:
+            await update_records(records, loads, collection, student)
+    except:
+        ...
 
-            history_partial_1 = history.PARCIAL_1
-            history_partial_2 = history.PARCIAL_2
-            history_partial_3 = history.PARCIAL_3
 
-            if student_partial_1 != "None" and history_partial_1 == "None":
-                history.PARTIAL_1 = student_partial_1
+async def main() -> None:
+    try:
+        task1 = asyncio.create_task(each_topic())
+        task2 = asyncio.create_task(each_student())
+        task3 = asyncio.create_task(each_load())
+        task4 = asyncio.create_task(each_history())
 
-            if student_partial_2 != "None" and history_partial_2 == "None":
-                history.PARTIAL_2 = student_partial_2
+        await task1
+        await task2
+        await task3
+        await task4
+    except:
+        ...
 
-            if student_partial_3 != "None" and history_partial_3 == "None":
-                history.PARTIAL_3 = student_partial_3
 
-            history.save()
+async def run_main() -> None:
+    lock = asyncio.Lock()
+
+    async with lock:
+        await main()
