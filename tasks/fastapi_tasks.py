@@ -88,8 +88,7 @@ async def each_history() -> None:
                                      .check_academic_load_for_task(student=student, partial=partial))
             await check_student_history(updated_student)
 
-    tasks = [asyncio.create_task(check_period(student)) for student in students]
-    await asyncio.gather(*tasks)
+    await asyncio.gather(*(check_period(student) for student in students))
 
 
 @exception_handler
