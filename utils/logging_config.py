@@ -14,7 +14,8 @@ from logging.handlers import RotatingFileHandler
 log_format = '%(asctime)s - %(levelname)s - %(message)s'
 formatter = logging.Formatter(log_format)
 
-log_handler_app = RotatingFileHandler('server_exceptions.log', maxBytes=10 ** 6, backupCount=5)
+log_handler_app = RotatingFileHandler('server_exceptions.log',
+                                      maxBytes=10 ** 6, backupCount=5, encoding="utf-8")
 log_handler_app.setFormatter(formatter)
 
 app_logger = logging.getLogger('server')
