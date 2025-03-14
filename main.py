@@ -24,7 +24,7 @@ from routes.auth_routes import auth_routes
 from routes.load_routes import load_routes
 from routes.history_routes import history_routes
 from errors.errors import ServerBaseException, ServerError, TokenNotAllowed
-from tasks.fastapi_tasks import run_main
+from tasks.fastapi_tasks import run_main, main
 from utils.config_secrets import Config
 from middlewares.logging_middleware import LoggingMiddleware
 
@@ -94,21 +94,16 @@ async def load_dbf(
         read_data = await dbf_data.read()
         file_name = dbf_data.filename.lower()
 
-        try:
-            with open(f"db/{file_name}", "wb") as dbf:
-                dbf.write(read_data)
+        with open(f"db/{file_name}", "wb") as dbf:
+            dbf.write(read_data)
 
-            if file_name == "cargas.dbf":
-                await run_main()
+        if file_name == "cargas.dbf":
+            await main()
 
-            return JSONResponse(
-                status_code=202,
-                content={"status": f"Loaded database {file_name} ✅"}
-            )
-
-        except Exception as e:
-            print(type(e))
-            raise ServerError(e) from e
+        return JSONResponse(
+            status_code=202,
+            content={"status": f"Loaded database {file_name} ✅"}
+        )
 
     raise TokenNotAllowed()
 

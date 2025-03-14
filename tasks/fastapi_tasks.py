@@ -161,17 +161,9 @@ async def check_student_history(student: dict) -> None:
         await update_records(records, loads, collection, student)
 
 
-@exception_handler
 async def main() -> None:
-    task1 = asyncio.create_task(each_topic())
-    task2 = asyncio.create_task(each_student())
-    task3 = asyncio.create_task(each_load())
-    task4 = asyncio.create_task(each_history())
-
-    await task1
-    await task2
-    await task3
-    await task4
+    await asyncio.gather(each_topic(), each_student(), each_load())
+    await each_history()
 
 
 async def run_main() -> None:
