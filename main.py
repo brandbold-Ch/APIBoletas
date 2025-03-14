@@ -24,7 +24,7 @@ from routes.auth_routes import auth_routes
 from routes.load_routes import load_routes
 from routes.history_routes import history_routes
 from errors.errors import ServerBaseException, ServerError, TokenNotAllowed
-from tasks.fastapi_tasks import main, run_main
+from tasks.fastapi_tasks import run_main
 from utils.config_secrets import Config
 from middlewares.logging_middleware import LoggingMiddleware
 
