@@ -43,7 +43,10 @@ Example:
     On failure:
         Raises an `InvalidTimePeriod` exception if exams are incomplete.
 """
-from errors.errors import InvalidTimePeriod, ServerError
+from prompt_toolkit.styles import Style
+
+from errors.errors import InvalidTimePeriod
+from utils.logging_config import app_logger
 
 
 def validate_partials(partials: list[str]) -> bool:
@@ -57,8 +60,8 @@ def validate_partials(partials: list[str]) -> bool:
     Returns:
         bool: True if all partials are completed, False otherwise.
     """
-    partials = [False if x == 'None' else True for x in partials]
-    return all(partials)
+    return all([False if x == 'None'
+                else True for x in partials])
 
 
 class Ratings:
@@ -139,9 +142,10 @@ class Ratings:
             raise InvalidTimePeriod("You have not completed the three partials 🕓️")
 
         except ZeroDivisionError as e:
-            raise ServerError(e) from e
+            app_logger.error(f"Error on <_calculate_semiannual>: {str(e)}")
 
-        except IndexError:
+        except IndexError as e:
+            app_logger.error(f"Error on <_calculate_semiannual>: {str(e)}")
             raise InvalidTimePeriod("There is no data on that history. 📋️")
 
     def _calculate_partials(self) -> dict:
@@ -182,9 +186,9 @@ class Ratings:
             }
 
         except ZeroDivisionError as e:
-            raise ServerError(e) from e
+            app_logger.error(f"Error on <_calculate_partials>: {str(e)}")
 
-    def score(self, student: dict):
+    def score(self, student: dict) -> dict:
         """
         Adds the calculated ratings to the given student object.
 
@@ -211,3 +215,10 @@ class Ratings:
 
         student["DETALLES"] = details
         return student
+
+
+async def get_ratings(enrollment: str = None,
+                      student: dict = None, partial: int = None) -> dict:
+    aggregate: list[dict] = student.get("CARGA") or student.get("HISTORIAL")
+    ratings = Ratings(aggregate, partial)
+    return ratings.score(student)

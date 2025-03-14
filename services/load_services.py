@@ -19,10 +19,9 @@ Usage:
 This service is typically used to fetch a student's academic load, calculate ratings for their courses,
 and enhance the data by including subject details for reporting or analysis purposes.
 """
-from models.student_model import ALUMNO
 from decorators.handlers import exception_handler
-from decorators.ratings import get_ratings
-from db.connection import get_collection, Collection
+from utils.rating_tools import get_ratings
+from utils.db import get_collection, Collection
 
 
 class LoadServices:

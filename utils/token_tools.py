@@ -37,6 +37,7 @@ from jose import jwt, JWTError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from errors.errors import NotFoundTokenError, ExpiredTokenError, InvalidTokenError
 from utils.config_secrets import Config
+from utils.logging_config import app_logger
 
 
 class CustomHTTPBearer(HTTPBearer):
@@ -125,6 +126,8 @@ def verify_token(token: str) -> dict:
         )
 
     except JWTError as e:
+        app_logger.error(f"Error on <verify_token>: {str(e)}")
+
         if str(e) == "Signature has expired.":
             raise ExpiredTokenError() from e
         raise InvalidTokenError() from e

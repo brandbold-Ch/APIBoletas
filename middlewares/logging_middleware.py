@@ -18,6 +18,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 from utils.logging_config import app_logger
 
+
 class LoggingMiddleware(BaseHTTPMiddleware):
     """
     Middleware that logs request details such as URL, method, headers, and client information.

@@ -9,7 +9,6 @@ Components:
 - The `authenticate` decorator: Wraps a function to add authentication logic.
 - Custom error handling: Raises `IncorrectUserError` if validation fails.
 """
-
 from functools import wraps
 from typing import Callable
 from fastapi.requests import Request

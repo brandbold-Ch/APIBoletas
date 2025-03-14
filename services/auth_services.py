@@ -16,7 +16,7 @@ Usage:
 This service is typically used to authenticate students by verifying their CURP and password
 and returning a JWT token that can be used for further API requests.
 """
-from db.connection import Collection, get_collection
+from utils.db import Collection, get_collection
 from decorators.handlers import exception_handler
 from errors.errors import PasswordsDoNotMatch, NotFoundStudent
 from utils.token_tools import create_token

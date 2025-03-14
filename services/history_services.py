@@ -15,10 +15,10 @@ Usage:
 This service is typically used to fetch and calculate ratings for a student's academic history,
 which can then be used for analysis or reporting purposes.
 """
-from db.connection import get_collection, Collection
+from utils.db import get_collection, Collection
 from decorators.handlers import exception_handler
 from models.student_model import ALUMNO
-from decorators.ratings import get_ratings
+from utils.rating_tools import get_ratings
 
 
 class HistoryServices:

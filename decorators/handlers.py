@@ -17,10 +17,6 @@ Apply the `exception_handler` decorator to any function that interacts with the 
 to ensure exceptions are translated to custom application-specific exceptions.
 """
 from typing import Callable
-from dbfmapper.exception.exceptions import (
-    NotFoundTable, DatabaseNotFound, DBFException
-)
-from errors.errors import NotFoundStudent, ServerError
 from utils.logging_config import app_logger
 
 
@@ -61,16 +57,7 @@ def exception_handler(func: Callable) -> Callable:
         try:
             return await func(*args, **kwargs)
 
-        except NotFoundTable as e:
-            app_logger.error(f"Error on <exception_handler, NotFoundTable>: {str(e)}")
-            raise NotFoundStudent() from e
-
-        except DatabaseNotFound as e:
-            app_logger.critical(f"Error on <exception_handler, DatabaseNotFound>: {str(e)}")
-            raise ServerError(e) from e
-
-        except DBFException as e:
-            app_logger.critical(f"Error on <exception_handler, DatabaseNotFound>: {str(e)}")
-            raise ServerError(e) from e
+        except Exception as e:
+            app_logger.error(f"Error on <{func.__name__}>: {str(e)}")
 
     return wrapper

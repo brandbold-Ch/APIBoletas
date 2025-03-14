@@ -20,10 +20,11 @@ This file ensures that student historical records are complete and up-to-date fo
 import asyncio
 import itertools
 from dbf import Table, READ_ONLY, Record, FieldnameList
-from errors.errors import InvalidTimePeriod
 from services.history_services import HistoryServices
 from services.load_services import LoadServices
-from db.connection import Collection, get_collection
+from utils.db import Collection, get_collection
+from utils.logging_config import app_logger
+from decorators.handlers import exception_handler
 
 histories = HistoryServices()
 load_services = LoadServices()
@@ -34,25 +35,20 @@ def asdict(ctx: Record, fields: FieldnameList) -> dict:
 
 
 def create_collections(table: Table) -> list[dict]:
-    try:
-        return [asdict(record, table.field_names) for record in table]
-    except:
-        ...
+    return [asdict(record, table.field_names) for record in table]
 
 
+@exception_handler
 async def each_topic() -> None:
-    try:
-        collection = get_collection(Collection.TOPICS)
-        topics = Table("db/asignaturas.dbf")
-        topics.open(mode=READ_ONLY)
+    collection = get_collection(Collection.TOPICS)
+    topics = Table("db/asignaturas.dbf")
+    topics.open(mode=READ_ONLY)
 
-        await collection.delete_many({})
-        await collection.insert_many(create_collections(topics))
-
-    except:
-        ...
+    await collection.delete_many({})
+    await collection.insert_many(create_collections(topics))
 
 
+@exception_handler
 async def each_student() -> None:
     try:
         collection = get_collection(Collection.STUDENTS)
@@ -61,10 +57,12 @@ async def each_student() -> None:
 
         await collection.delete_many({})
         await collection.insert_many(create_collections(students))
-    except:
-        ...
+
+    except Exception as e:
+        app_logger.error(f"Error on <each_student>: {str(e)}")
 
 
+@exception_handler
 async def each_load() -> None:
     try:
         collection = get_collection(Collection.LOADS)
@@ -73,29 +71,31 @@ async def each_load() -> None:
 
         await collection.delete_many({})
         await collection.insert_many(create_collections(loads))
-    except:
-        ...
+
+    except Exception as e:
+        app_logger.error(f"Error on <each_load>: {str(e)}")
 
 
+@exception_handler
 async def each_history() -> None:
     collection = get_collection(Collection.STUDENTS)
     students = await collection.find().to_list(None)
 
+    @exception_handler
     async def check_period(student) -> None:
         for partial in [1, 2, 3]:
-            try:
-                updated_student = await (load_services
-                                         .check_academic_load_for_task(student=student, partial=partial))
-                await check_student_history(updated_student)
-            except (InvalidTimePeriod, TypeError) as e:
-                ...
+            updated_student = await (load_services
+                                     .check_academic_load_for_task(student=student, partial=partial))
+            await check_student_history(updated_student)
 
     tasks = [asyncio.create_task(check_period(student)) for student in students]
     await asyncio.gather(*tasks)
 
 
+@exception_handler
 async def update_records(records, loads, collection, student) -> None:
-    filtered_records = [record for record in records if record["GRADO"] == student["GRADO"]]
+    filtered_records = [record for record in records
+                        if record["GRADO"] == student["GRADO"]]
     updates = []
 
     for record, load in itertools.product(filtered_records, loads):
@@ -116,6 +116,7 @@ async def update_records(records, loads, collection, student) -> None:
         await asyncio.gather(*updates)
 
 
+@exception_handler
 async def check_student_history(student: dict) -> None:
     """
     Checks if the student's historical data exists and updates or creates
@@ -143,41 +144,35 @@ async def check_student_history(student: dict) -> None:
                                      "GRADO": student["GRADO"]}).to_list(None)
     loads = student["CARGA"]
 
-    try:
-        if len(records) == 0:
-            doc = [
-                {
-                    "MATRICULA": student["MATRICULA"],
-                    "GRUPO": student["GRUPO"],
-                    "GRADO": student["GRADO"],
-                    "CLAVEMAT": load["CLAVEMAT"],
-                    "ASIGNATURA": load["DATOS_MATERIA"]["ASIGNATURA"],
-                    "PARCIAL_1": load["PARCIAL_1"],
-                    "PARCIAL_2": load["PARCIAL_2"],
-                    "PARCIAL_3": load["PARCIAL_3"]
-                } for load in loads
-            ]
-            await collection.insert_many(doc)
-
-        else:
-            await update_records(records, loads, collection, student)
-    except:
-        ...
+    if len(records) == 0:
+        doc = [
+            {
+                "MATRICULA": student["MATRICULA"],
+                "GRUPO": student["GRUPO"],
+                "GRADO": student["GRADO"],
+                "CLAVEMAT": load["CLAVEMAT"],
+                "ASIGNATURA": load["DATOS_MATERIA"]["ASIGNATURA"],
+                "PARCIAL_1": load["PARCIAL_1"],
+                "PARCIAL_2": load["PARCIAL_2"],
+                "PARCIAL_3": load["PARCIAL_3"]
+            } for load in loads
+        ]
+        await collection.insert_many(doc)
+    else:
+        await update_records(records, loads, collection, student)
 
 
+@exception_handler
 async def main() -> None:
-    try:
-        task1 = asyncio.create_task(each_topic())
-        task2 = asyncio.create_task(each_student())
-        task3 = asyncio.create_task(each_load())
-        task4 = asyncio.create_task(each_history())
+    task1 = asyncio.create_task(each_topic())
+    task2 = asyncio.create_task(each_student())
+    task3 = asyncio.create_task(each_load())
+    task4 = asyncio.create_task(each_history())
 
-        await task1
-        await task2
-        await task3
-        await task4
-    except:
-        ...
+    await task1
+    await task2
+    await task3
+    await task4
 
 
 async def run_main() -> None:
