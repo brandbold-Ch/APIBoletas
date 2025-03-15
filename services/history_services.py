@@ -54,6 +54,7 @@ class HistoryServices:
         student = await self.student.find_one({"MATRICULA": enrollment}, {"_id": 0})
         student["HISTORIAL"] = await self.records.find({
             "MATRICULA": enrollment, "GRADO": rank}, {"_id": 0}).to_list(None)
+
         await get_ratings(enrollment, student, partial)
         return student
     

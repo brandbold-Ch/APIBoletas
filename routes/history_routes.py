@@ -120,5 +120,5 @@ async def get_semiannual_academic_histories(
     """
     return JSONResponse(
         status_code=200,
-        content=await history.get_histories(enrollment, 6, rank)
+        content=await history.get_histories(enrollment, 6, str(rank))
     )
