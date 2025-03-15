@@ -19,7 +19,6 @@ Usage:
 This service is typically used to fetch a student's academic load, calculate ratings for their courses,
 and enhance the data by including subject details for reporting or analysis purposes.
 """
-from decorators.handlers import exception_handler
 from utils.rating_tools import get_ratings
 from utils.db import get_collection, Collection
 
@@ -56,7 +55,6 @@ class LoadServices:
             topic = await collection.find({"CLAVE_IN": charge["CLAVE_IN"]}, {"_id": 0}).to_list(None)
             charge["DATOS_MATERIA"] = topic[-1]
 
-    @exception_handler
     async def get_academic_load(self, enrollment: str, partial: int) -> dict:
         """
         Retrieves the academic load for a given student, applies ratings to their courses,
@@ -81,7 +79,6 @@ class LoadServices:
         await get_ratings(enrollment, student, partial)
         return student
 
-    @exception_handler
     async def check_academic_load_for_task(self, enrollment: str = None,
                                            student: dict = None, partial: int = None) -> dict:
         student["CARGA"] = await self.loads.find({"MATRICULA": student["MATRICULA"]}).to_list(None)

@@ -31,7 +31,6 @@ class HistoryServices:
         self.student = get_collection(Collection.STUDENTS)
         self.records = get_collection(Collection.RECORDS)
 
-    @exception_handler
     async def get_histories(self, enrollment: str, partial: int, rank: str) -> dict:
         """
         Fetches a student's academic history based on their enrollment, grade rank, and partial.

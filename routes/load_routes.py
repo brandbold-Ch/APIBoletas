@@ -54,7 +54,6 @@ bearer = CustomHTTPBearer()
 @authenticate
 async def get_academic_load(
         request: Request,
-        background: BackgroundTasks,
         enrollment: Annotated[str, Path(max_length=15, min_length=15)],
         partial: Annotated[int, Query(ge=0, le=3)] = 0
 ) -> JSONResponse:
@@ -64,8 +63,6 @@ async def get_academic_load(
 
     Args:
         request (Request): The HTTP request object, automatically passed by FastAPI.
-        background (BackgroundTasks): The background tasks object, used to run tasks
-        asynchronously.
         enrollment (Annotated[str]): The student's enrollment ID. Must be exactly 15
         characters.
         partial (Annotated[int]): The academic period to fetch data for
@@ -99,6 +96,7 @@ async def get_academic_load(
         }
     """
     response = await load.get_academic_load(enrollment, partial)
+    print(response)
 
     return JSONResponse(
         status_code=200,
@@ -110,7 +108,6 @@ async def get_academic_load(
 @authenticate
 async def get_semiannual_academic_load(
         request: Request,
-        background: BackgroundTasks,
         enrollment: Annotated[str, Path(max_length=15, min_length=15)],
 ) -> JSONResponse:
     """
@@ -118,8 +115,6 @@ async def get_semiannual_academic_load(
 
         Args:
             request (Request): The HTTP request object, automatically passed by FastAPI.
-            background (BackgroundTasks): The background tasks object, used to run tasks
-            asynchronously.
             enrollment (Annotated[str]): The student's enrollment ID. Must be exactly
             15 characters.
 

@@ -7,7 +7,6 @@ Dependencies:
 - logging: Standard library for logging functionality.
 - logging.handlers.RotatingFileHandler: A handler that writes logs to a file with rotation.
 """
-
 import logging
 from logging.handlers import RotatingFileHandler
 
